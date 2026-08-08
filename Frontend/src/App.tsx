@@ -1,10 +1,13 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
 import { InicioSesion } from "./paginas/InicioSesion";
 import { Panel } from "./paginas/Panel";
 import { Productos } from "./paginas/Productos";
 import { Categorias } from "./paginas/Categorias";
 import { Clientes } from "./paginas/Clientes";
+
 import { LayoutPrincipal } from "./layouts/LayoutPrincipal";
+import { RutaProtegida } from "./rutas/RutaProtegida";
 
 function App() {
   return (
@@ -14,11 +17,16 @@ function App() {
 
         <Route path="/login" element={<InicioSesion />} />
 
-        <Route element={<LayoutPrincipal />}>
-          <Route path="/dashboard" element={<Panel />} />
-          <Route path="/productos" element={<Productos />} />
-          <Route path="/categorias" element={<Categorias />} />
-          <Route path="/clientes" element={<Clientes />} />
+        <Route element={<RutaProtegida />}>
+          <Route element={<LayoutPrincipal />}>
+            <Route path="/dashboard" element={<Panel />} />
+
+            <Route path="/productos" element={<Productos />} />
+
+            <Route path="/categorias" element={<Categorias />} />
+
+            <Route path="/clientes" element={<Clientes />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

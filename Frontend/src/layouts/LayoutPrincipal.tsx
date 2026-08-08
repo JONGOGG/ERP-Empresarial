@@ -1,6 +1,19 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 
 export function LayoutPrincipal() {
+  const navigate = useNavigate();
+
+  const usuarioGuardado = localStorage.getItem("usuario");
+
+  const usuario = usuarioGuardado ? JSON.parse(usuarioGuardado) : null;
+
+  const cerrarSesion = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("usuario");
+
+    navigate("/login");
+  };
+
   return (
     <div>
       <aside>
@@ -8,16 +21,22 @@ export function LayoutPrincipal() {
 
         <nav>
           <NavLink to="/dashboard">Dashboard</NavLink>
+
           <NavLink to="/productos">Productos</NavLink>
+
           <NavLink to="/categorias">Categorías</NavLink>
+
           <NavLink to="/clientes">Clientes</NavLink>
         </nav>
       </aside>
 
       <div>
         <header>
-          <span>Administrador</span>
-          <button>Cerrar sesión</button>
+          <span>{usuario?.nombre ?? "Usuario"}</span>
+
+          <button type="button" onClick={cerrarSesion}>
+            Cerrar sesión
+          </button>
         </header>
 
         <main>
