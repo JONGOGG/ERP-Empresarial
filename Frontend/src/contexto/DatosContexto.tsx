@@ -2,6 +2,7 @@ import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
 import type { Categoria } from "../tipos/Categoria";
 import type { Producto } from "../tipos/Productos";
+import type { Cliente } from "../tipos/Cliente";
 
 interface DatosContextoTipo {
   categorias: Categoria[];
@@ -9,6 +10,9 @@ interface DatosContextoTipo {
 
   productos: Producto[];
   setProductos: React.Dispatch<React.SetStateAction<Producto[]>>;
+
+  clientes: Cliente[];
+  setClientes: React.Dispatch<React.SetStateAction<Cliente[]>>;
 }
 
 const DatosContexto = createContext<DatosContextoTipo | undefined>(undefined);
@@ -16,6 +20,7 @@ const DatosContexto = createContext<DatosContextoTipo | undefined>(undefined);
 export function DatosProvider({ children }: { children: ReactNode }) {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [productos, setProductos] = useState<Producto[]>([]);
+  const [clientes, setClientes] = useState<Cliente[]>([]);
 
   return (
     <DatosContexto.Provider
@@ -24,6 +29,8 @@ export function DatosProvider({ children }: { children: ReactNode }) {
         setCategorias,
         productos,
         setProductos,
+        clientes,
+        setClientes,
       }}
     >
       {children}
