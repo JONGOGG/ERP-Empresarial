@@ -1,4 +1,6 @@
 import type { Producto } from "../tipos/Productos";
+import { apiFetch } from "./api";
+
 
 const API_URL = "http://localhost:3001/api/productos";
 
@@ -31,7 +33,7 @@ export async function obtenerProductos(): Promise<Producto[]> {
 }
 
 export async function crearProducto(datos: DatosProducto): Promise<Producto> {
-  const respuesta = await fetch(API_URL, {
+  const respuesta = await apiFetch("/productos", {
     method: "POST",
 
     headers: obtenerHeaders(),
@@ -50,7 +52,7 @@ export async function actualizarProducto(
   id: number,
   datos: DatosProducto,
 ): Promise<Producto> {
-  const respuesta = await fetch(`${API_URL}/${id}`, {
+  const respuesta = await apiFetch(`/productos/${id}`, {
     method: "PUT",
 
     headers: obtenerHeaders(),
@@ -66,7 +68,7 @@ export async function actualizarProducto(
 }
 
 export async function eliminarProducto(id: number): Promise<void> {
-  const respuesta = await fetch(`${API_URL}/${id}`, {
+  const respuesta = await apiFetch(`/productos/${id}`, {
     method: "DELETE",
     headers: obtenerHeaders(),
   });

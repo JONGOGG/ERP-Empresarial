@@ -1,6 +1,5 @@
 import type { Categoria } from "../tipos/Categoria";
-
-const API_URL = "http://localhost:3001/api/categorias";
+import { apiFetch } from "./api";
 
 function obtenerHeaders() {
   const token = localStorage.getItem("token");
@@ -12,9 +11,9 @@ function obtenerHeaders() {
 }
 
 export async function obtenerCategorias(): Promise<Categoria[]> {
-  const respuesta = await fetch(API_URL, {
-  headers: obtenerHeaders(),
-});
+  const respuesta = await apiFetch("/categorias", {
+    headers: obtenerHeaders(),
+  });
 
   if (!respuesta.ok) {
     throw new Error("No se pudieron obtener las categorías");
@@ -27,11 +26,8 @@ export async function crearCategoria(datos: {
   nombre: string;
   descripcion: string;
 }): Promise<Categoria> {
-  const respuesta = await fetch(API_URL, {
+  const respuesta = await apiFetch("/categorias", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(datos),
   });
 
@@ -47,13 +43,10 @@ export async function actualizarCategoria(
   datos: {
     nombre: string;
     descripcion: string;
-  }
+  },
 ): Promise<Categoria> {
-  const respuesta = await fetch(`${API_URL}/${id}`, {
+  const respuesta = await apiFetch(`${"/categorias"}/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(datos),
   });
 
@@ -65,7 +58,7 @@ export async function actualizarCategoria(
 }
 
 export async function eliminarCategoria(id: number): Promise<void> {
-  const respuesta = await fetch(`${API_URL}/${id}`, {
+  const respuesta = await apiFetch(`/categorias/${id}`, {
     method: "DELETE",
   });
 
@@ -73,4 +66,3 @@ export async function eliminarCategoria(id: number): Promise<void> {
     throw new Error("No se pudo eliminar la categoría");
   }
 }
-

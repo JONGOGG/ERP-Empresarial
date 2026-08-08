@@ -1,6 +1,5 @@
 import type { Cliente } from "../tipos/Cliente";
-
-const API_URL = "http://localhost:3001/api/clientes";
+import { apiFetch } from "./api";
 
 interface DatosCliente {
   nombre: string;
@@ -18,7 +17,7 @@ function obtenerHeaders() {
   };
 }
 export async function obtenerClientes(): Promise<Cliente[]> {
-  const respuesta = await fetch(API_URL, {
+  const respuesta = await apiFetch("/clientes", {
     headers: obtenerHeaders(),
   });
 
@@ -30,7 +29,7 @@ export async function obtenerClientes(): Promise<Cliente[]> {
 }
 
 export async function crearCliente(datos: DatosCliente): Promise<Cliente> {
-  const respuesta = await fetch(API_URL, {
+  const respuesta = await apiFetch("/clientes", {
     method: "POST",
     headers: obtenerHeaders(),
     body: JSON.stringify(datos),
@@ -47,7 +46,7 @@ export async function actualizarCliente(
   id: number,
   datos: DatosCliente,
 ): Promise<Cliente> {
-  const respuesta = await fetch(`${API_URL}/${id}`, {
+  const respuesta = await apiFetch(`/clientes/${id}`, {
     method: "PUT",
     headers: obtenerHeaders(),
     body: JSON.stringify(datos),
@@ -61,7 +60,7 @@ export async function actualizarCliente(
 }
 
 export async function eliminarCliente(id: number): Promise<void> {
-  const respuesta = await fetch(`${API_URL}/${id}`, {
+  const respuesta = await apiFetch(`/clientes/${id}`, {
     method: "DELETE",
     headers: obtenerHeaders(),
   });
