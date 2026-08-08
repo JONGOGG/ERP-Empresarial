@@ -1,12 +1,15 @@
 import { useState } from "react";
 import type { Categoria } from "../tipos/Categoria";
+import { useDatos } from "../contexto/DatosContexto";
 
 export function Categorias() {
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const { categorias, setCategorias } = useDatos();
+  
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
-  const [categoriaEditando, setCategoriaEditando] =
-    useState<Categoria | null>(null);
+  const [categoriaEditando, setCategoriaEditando] = useState<Categoria | null>(
+    null,
+  );
 
   const guardarCategoria = (event: React.FormEvent) => {
     event.preventDefault();
@@ -22,8 +25,8 @@ export function Categorias() {
                 nombre,
                 descripcion,
               }
-            : categoria
-        )
+            : categoria,
+        ),
       );
 
       setCategoriaEditando(null);
@@ -48,9 +51,7 @@ export function Categorias() {
   };
 
   const eliminarCategoria = (id: number) => {
-    setCategorias(
-      categorias.filter((categoria) => categoria.id !== id)
-    );
+    setCategorias(categorias.filter((categoria) => categoria.id !== id));
 
     if (categoriaEditando?.id === id) {
       setCategoriaEditando(null);
@@ -96,16 +97,11 @@ export function Categorias() {
         </div>
 
         <button type="submit">
-          {categoriaEditando
-            ? "Guardar cambios"
-            : "Agregar categoría"}
+          {categoriaEditando ? "Guardar cambios" : "Agregar categoría"}
         </button>
 
         {categoriaEditando && (
-          <button
-            type="button"
-            onClick={cancelarEdicion}
-          >
+          <button type="button" onClick={cancelarEdicion}>
             Cancelar
           </button>
         )}
@@ -132,19 +128,11 @@ export function Categorias() {
                 <td>{categoria.descripcion}</td>
 
                 <td>
-                  <button
-                    onClick={() =>
-                      seleccionarCategoria(categoria)
-                    }
-                  >
+                  <button onClick={() => seleccionarCategoria(categoria)}>
                     Editar
                   </button>
 
-                  <button
-                    onClick={() =>
-                      eliminarCategoria(categoria.id)
-                    }
-                  >
+                  <button onClick={() => eliminarCategoria(categoria.id)}>
                     Eliminar
                   </button>
                 </td>
