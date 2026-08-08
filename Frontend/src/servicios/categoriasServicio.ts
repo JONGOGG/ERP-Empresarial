@@ -2,8 +2,19 @@ import type { Categoria } from "../tipos/Categoria";
 
 const API_URL = "http://localhost:3001/api/categorias";
 
+function obtenerHeaders() {
+  const token = localStorage.getItem("token");
+
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+}
+
 export async function obtenerCategorias(): Promise<Categoria[]> {
-  const respuesta = await fetch(API_URL);
+  const respuesta = await fetch(API_URL, {
+  headers: obtenerHeaders(),
+});
 
   if (!respuesta.ok) {
     throw new Error("No se pudieron obtener las categorías");
@@ -62,3 +73,4 @@ export async function eliminarCategoria(id: number): Promise<void> {
     throw new Error("No se pudo eliminar la categoría");
   }
 }
+

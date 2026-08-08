@@ -1,7 +1,6 @@
 import type { Producto } from "../tipos/Productos";
 
-const API_URL =
-  "http://localhost:3001/api/productos";
+const API_URL = "http://localhost:3001/api/productos";
 
 interface DatosProducto {
   nombre: string;
@@ -10,41 +9,38 @@ interface DatosProducto {
   stock: number;
   categoriaId: number;
 }
+function obtenerHeaders() {
+  const token = localStorage.getItem("token");
 
-export async function obtenerProductos(): Promise<
-  Producto[]
-> {
-  const respuesta =
-    await fetch(API_URL);
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+}
+
+export async function obtenerProductos(): Promise<Producto[]> {
+  const respuesta = await fetch(API_URL, {
+    headers: obtenerHeaders(),
+  });
 
   if (!respuesta.ok) {
-    throw new Error(
-      "No se pudieron obtener los productos"
-    );
+    throw new Error("No se pudieron obtener los productos");
   }
 
   return respuesta.json();
 }
 
-export async function crearProducto(
-  datos: DatosProducto
-): Promise<Producto> {
-  const respuesta =
-    await fetch(API_URL, {
-      method: "POST",
+export async function crearProducto(datos: DatosProducto): Promise<Producto> {
+  const respuesta = await fetch(API_URL, {
+    method: "POST",
 
-      headers: {
-        "Content-Type":
-          "application/json",
-      },
+    headers: obtenerHeaders(),
 
-      body: JSON.stringify(datos),
-    });
+    body: JSON.stringify(datos),
+  });
 
   if (!respuesta.ok) {
-    throw new Error(
-      "No se pudo crear el producto"
-    );
+    throw new Error("No se pudo crear el producto");
   }
 
   return respuesta.json();
@@ -52,48 +48,30 @@ export async function crearProducto(
 
 export async function actualizarProducto(
   id: number,
-  datos: DatosProducto
+  datos: DatosProducto,
 ): Promise<Producto> {
-  const respuesta =
-    await fetch(
-      `${API_URL}/${id}`,
-      {
-        method: "PUT",
+  const respuesta = await fetch(`${API_URL}/${id}`, {
+    method: "PUT",
 
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
+    headers: obtenerHeaders(),
 
-        body: JSON.stringify(
-          datos
-        ),
-      }
-    );
+    body: JSON.stringify(datos),
+  });
 
   if (!respuesta.ok) {
-    throw new Error(
-      "No se pudo actualizar el producto"
-    );
+    throw new Error("No se pudo actualizar el producto");
   }
 
   return respuesta.json();
 }
 
-export async function eliminarProducto(
-  id: number
-): Promise<void> {
-  const respuesta =
-    await fetch(
-      `${API_URL}/${id}`,
-      {
-        method: "DELETE",
-      }
-    );
+export async function eliminarProducto(id: number): Promise<void> {
+  const respuesta = await fetch(`${API_URL}/${id}`, {
+    method: "DELETE",
+    headers: obtenerHeaders(),
+  });
 
   if (!respuesta.ok) {
-    throw new Error(
-      "No se pudo eliminar el producto"
-    );
+    throw new Error("No se pudo eliminar el producto");
   }
 }

@@ -9,8 +9,18 @@ interface DatosCliente {
   ciudad: string;
 }
 
+function obtenerHeaders() {
+  const token = localStorage.getItem("token");
+
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+}
 export async function obtenerClientes(): Promise<Cliente[]> {
-  const respuesta = await fetch(API_URL);
+  const respuesta = await fetch(API_URL, {
+    headers: obtenerHeaders(),
+  });
 
   if (!respuesta.ok) {
     throw new Error("No se pudieron obtener los clientes");
@@ -19,14 +29,10 @@ export async function obtenerClientes(): Promise<Cliente[]> {
   return respuesta.json();
 }
 
-export async function crearCliente(
-  datos: DatosCliente
-): Promise<Cliente> {
+export async function crearCliente(datos: DatosCliente): Promise<Cliente> {
   const respuesta = await fetch(API_URL, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: obtenerHeaders(),
     body: JSON.stringify(datos),
   });
 
@@ -39,13 +45,11 @@ export async function crearCliente(
 
 export async function actualizarCliente(
   id: number,
-  datos: DatosCliente
+  datos: DatosCliente,
 ): Promise<Cliente> {
   const respuesta = await fetch(`${API_URL}/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: obtenerHeaders(),
     body: JSON.stringify(datos),
   });
 
@@ -56,11 +60,10 @@ export async function actualizarCliente(
   return respuesta.json();
 }
 
-export async function eliminarCliente(
-  id: number
-): Promise<void> {
+export async function eliminarCliente(id: number): Promise<void> {
   const respuesta = await fetch(`${API_URL}/${id}`, {
     method: "DELETE",
+    headers: obtenerHeaders(),
   });
 
   if (!respuesta.ok) {
