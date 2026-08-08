@@ -4,6 +4,7 @@ import { Panel } from "./paginas/Panel";
 import { Productos } from "./paginas/Productos";
 import { Categorias } from "./paginas/Categorias";
 import { Clientes } from "./paginas/Clientes";
+import { LayoutPrincipal } from "./layouts/LayoutPrincipal";
 
 function App() {
   return (
@@ -12,10 +13,13 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
 
         <Route path="/login" element={<InicioSesion />} />
-        <Route path="/dashboard" element={<Panel />} />
-        <Route path="/productos" element={<Productos />} />
-        <Route path="/categorias" element={<Categorias />} />
-        <Route path="/clientes" element={<Clientes />} />
+
+        <Route element={<LayoutPrincipal />}>
+          <Route path="/dashboard" element={<Panel />} />
+          <Route path="/productos" element={<Productos />} />
+          <Route path="/categorias" element={<Categorias />} />
+          <Route path="/clientes" element={<Clientes />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );
