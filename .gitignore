@@ -22,3 +22,19 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Dependencias
+node_modules/
+
+# Variables de entorno
+.env
+.env.*
+
+# Archivos de herramientas/IA
+.agents/
+.claude/
+.windsurf/
+
+# Builds
+dist/
+build/
