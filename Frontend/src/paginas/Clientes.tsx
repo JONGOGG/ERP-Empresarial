@@ -1,15 +1,42 @@
-import { useState } from "react";
-import { useDatos } from "../contexto/DatosContexto";
+import { useEffect, useState } from "react";
 import type { Cliente } from "../tipos/Cliente";
 
+import {
+  obtenerClientes,
+  crearCliente,
+  actualizarCliente,
+  eliminarCliente,
+} from "../servicios/clientesServicios";
+
 export function Clientes() {
-  const { clientes, setClientes } = useDatos();
+  const [clientes, setClientes] = useState<Cliente[]>([]);
 
   const [nombre, setNombre] = useState("");
   const [correo, setCorreo] = useState("");
   const [telefono, setTelefono] = useState("");
   const [ciudad, setCiudad] = useState("");
-  const [clienteEditando, setClienteEditando] = useState<Cliente | null>(null);
+
+  const [clienteEditando, setClienteEditando] =
+    useState<Cliente | null>(null);
+
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const cargarClientes = async () => {
+      try {
+        const datos = await obtenerClientes();
+        setClientes(datos);
+      } catch (error) {
+        console.error(error);
+        setError("No se pudieron cargar los clientes");
+      } finally {
+        setCargando(false);
+      }
+    };
+
+    cargarClientes();
+  }, []);
 
   const limpiarFormulario = () => {
     setNombre("");
@@ -19,7 +46,9 @@ export function Clientes() {
     setClienteEditando(null);
   };
 
-  const guardarCliente = (event: React.FormEvent) => {
+  const guardarCliente = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault();
 
     if (
@@ -28,36 +57,47 @@ export function Clientes() {
       !telefono.trim() ||
       !ciudad.trim()
     ) {
+      setError("Todos los campos son obligatorios");
       return;
     }
 
-    if (clienteEditando) {
-      setClientes(
-        clientes.map((cliente) =>
-          cliente.id === clienteEditando.id
-            ? {
-                ...cliente,
-                nombre,
-                correo,
-                telefono,
-                ciudad,
-              }
-            : cliente,
-        ),
-      );
-    } else {
-      const nuevoCliente: Cliente = {
-        id: Date.now(),
-        nombre,
-        correo,
-        telefono,
-        ciudad,
-      };
+    const datos = {
+      nombre: nombre.trim(),
+      correo: correo.trim(),
+      telefono: telefono.trim(),
+      ciudad: ciudad.trim(),
+    };
 
-      setClientes([...clientes, nuevoCliente]);
+    try {
+      setError("");
+
+      if (clienteEditando) {
+        const actualizado = await actualizarCliente(
+          clienteEditando.id,
+          datos
+        );
+
+        setClientes((clientesActuales) =>
+          clientesActuales.map((cliente) =>
+            cliente.id === actualizado.id
+              ? actualizado
+              : cliente
+          )
+        );
+      } else {
+        const nuevo = await crearCliente(datos);
+
+        setClientes((clientesActuales) => [
+          ...clientesActuales,
+          nuevo,
+        ]);
+      }
+
+      limpiarFormulario();
+    } catch (error) {
+      console.error(error);
+      setError("No se pudo guardar el cliente");
     }
-
-    limpiarFormulario();
   };
 
   const seleccionarCliente = (cliente: Cliente) => {
@@ -68,8 +108,23 @@ export function Clientes() {
     setCiudad(cliente.ciudad);
   };
 
-  const eliminarCliente = (id: number) => {
-    setClientes(clientes.filter((cliente) => cliente.id !== id));
+  const manejarEliminarCliente = async (id: number) => {
+    try {
+      await eliminarCliente(id);
+
+      setClientes((clientesActuales) =>
+        clientesActuales.filter(
+          (cliente) => cliente.id !== id
+        )
+      );
+
+      if (clienteEditando?.id === id) {
+        limpiarFormulario();
+      }
+    } catch (error) {
+      console.error(error);
+      setError("No se pudo eliminar el cliente");
+    }
   };
 
   return (
@@ -84,7 +139,9 @@ export function Clientes() {
             id="nombre"
             type="text"
             value={nombre}
-            onChange={(event) => setNombre(event.target.value)}
+            onChange={(event) =>
+              setNombre(event.target.value)
+            }
           />
         </div>
 
@@ -94,7 +151,9 @@ export function Clientes() {
             id="correo"
             type="email"
             value={correo}
-            onChange={(event) => setCorreo(event.target.value)}
+            onChange={(event) =>
+              setCorreo(event.target.value)
+            }
           />
         </div>
 
@@ -104,7 +163,9 @@ export function Clientes() {
             id="telefono"
             type="text"
             value={telefono}
-            onChange={(event) => setTelefono(event.target.value)}
+            onChange={(event) =>
+              setTelefono(event.target.value)
+            }
           />
         </div>
 
@@ -114,24 +175,35 @@ export function Clientes() {
             id="ciudad"
             type="text"
             value={ciudad}
-            onChange={(event) => setCiudad(event.target.value)}
+            onChange={(event) =>
+              setCiudad(event.target.value)
+            }
           />
         </div>
 
         <button type="submit">
-          {clienteEditando ? "Guardar cambios" : "Agregar cliente"}
+          {clienteEditando
+            ? "Guardar cambios"
+            : "Agregar cliente"}
         </button>
 
         {clienteEditando && (
-          <button type="button" onClick={limpiarFormulario}>
+          <button
+            type="button"
+            onClick={limpiarFormulario}
+          >
             Cancelar
           </button>
         )}
       </form>
 
+      {error && <p>{error}</p>}
+
       <hr />
 
-      {clientes.length === 0 ? (
+      {cargando ? (
+        <p>Cargando clientes...</p>
+      ) : clientes.length === 0 ? (
         <p>No hay clientes registrados.</p>
       ) : (
         <table>
@@ -154,11 +226,21 @@ export function Clientes() {
                 <td>{cliente.ciudad}</td>
 
                 <td>
-                  <button onClick={() => seleccionarCliente(cliente)}>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      seleccionarCliente(cliente)
+                    }
+                  >
                     Editar
                   </button>
 
-                  <button onClick={() => eliminarCliente(cliente.id)}>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      manejarEliminarCliente(cliente.id)
+                    }
+                  >
                     Eliminar
                   </button>
                 </td>

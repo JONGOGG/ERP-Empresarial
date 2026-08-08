@@ -4,4 +4,6 @@ export interface Cliente {
   correo: string;
   telefono: string;
   ciudad: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
