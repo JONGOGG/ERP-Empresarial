@@ -14,9 +14,16 @@ export function LayoutPrincipal() {
         </nav>
       </aside>
 
-      <main>
-        <Outlet />
-      </main>
+      <div>
+        <header>
+          <span>Administrador</span>
+          <button>Cerrar sesión</button>
+        </header>
+
+        <main>
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }
