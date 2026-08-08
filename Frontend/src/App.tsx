@@ -1,9 +1,23 @@
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { InicioSesion } from "./paginas/InicioSesion";
+import { Panel } from "./paginas/Panel";
+import { Productos } from "./paginas/Productos";
+import { Categorias } from "./paginas/Categorias";
+import { Clientes } from "./paginas/Clientes";
+
 function App() {
   return (
-    <main>
-      <h1>ERP Empresarial</h1>
-      <p>Sistema de gestión empresarial</p>
-    </main>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" replace />} />
+
+        <Route path="/login" element={<InicioSesion />} />
+        <Route path="/dashboard" element={<Panel />} />
+        <Route path="/productos" element={<Productos />} />
+        <Route path="/categorias" element={<Categorias />} />
+        <Route path="/clientes" element={<Clientes />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
