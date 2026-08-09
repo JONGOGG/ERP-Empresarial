@@ -1,9 +1,21 @@
 import { Router } from "express";
 
-import { registrarVenta } from "../controllers/ventas.controller.js";
+import { listarVentas, obtenerVenta, registrarVenta } from "../controllers/ventas.controller.js";
 import { permitirRoles } from "../middlewares/roles.middleware.js";
 
 const router = Router();
+
+router.get(
+  "/",
+  permitirRoles("ADMIN", "EMPLEADO"),
+  listarVentas
+);
+
+router.get(
+  "/:id",
+  permitirRoles("ADMIN", "EMPLEADO"),
+  obtenerVenta
+);
 
 router.post(
   "/",

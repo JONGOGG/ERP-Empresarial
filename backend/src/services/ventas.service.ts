@@ -102,3 +102,50 @@ export async function crearVenta(datos: DatosVenta) {
     return venta;
   });
 }
+export function obtenerVentas() {
+  return prisma.venta.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      cliente: true,
+      usuario: {
+        select: {
+          id: true,
+          nombre: true,
+          correo: true,
+          rol: true,
+        },
+      },
+      detalles: {
+        include: {
+          producto: true,
+        },
+      },
+    },
+  });
+}
+
+export function obtenerVentaPorId(id: number) {
+  return prisma.venta.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      cliente: true,
+      usuario: {
+        select: {
+          id: true,
+          nombre: true,
+          correo: true,
+          rol: true,
+        },
+      },
+      detalles: {
+        include: {
+          producto: true,
+        },
+      },
+    },
+  });
+}
