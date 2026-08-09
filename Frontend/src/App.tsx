@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import { InicioSesion } from "./paginas/InicioSesion";
-import { Panel } from "./paginas/Panel";
+import { Dashboard } from "./paginas/Dashboard";
 import { Productos } from "./paginas/Productos";
 import { Categorias } from "./paginas/Categorias";
 import { Clientes } from "./paginas/Clientes";
@@ -22,7 +22,7 @@ function App() {
 
         <Route element={<RutaProtegida />}>
           <Route element={<LayoutPrincipal />}>
-            <Route path="/dashboard" element={<Panel />} />
+            <Route path="/dashboard" element={<Dashboard />} />
 
             <Route path="/productos" element={<Productos />} />
 
