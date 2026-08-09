@@ -15,7 +15,7 @@ export function crearCategoria(datos: {
   return prisma.categoria.create({
     data: {
       nombre: datos.nombre,
-      descripcion: datos.descripcion,
+      descripcion: datos.descripcion ?? null,
     },
   });
 }
@@ -31,7 +31,7 @@ export function actualizarCategoria(
     where: { id },
     data: {
       nombre: datos.nombre,
-      descripcion: datos.descripcion,
+      descripcion: datos.descripcion ?? null,
     },
   });
 }

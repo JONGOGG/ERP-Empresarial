@@ -8,20 +8,13 @@ interface DatosCliente {
   ciudad: string;
 }
 
-function obtenerHeaders() {
-  const token = localStorage.getItem("token");
-
-  return {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-  };
-}
 export async function obtenerClientes(): Promise<Cliente[]> {
-  const respuesta = await apiFetch("/clientes", {
-    headers: obtenerHeaders(),
-  });
+  const respuesta = await apiFetch("/clientes");
 
   if (!respuesta.ok) {
+    const texto = await respuesta.text();
+    console.error("Error obtenerClientes:", texto);
+
     throw new Error("No se pudieron obtener los clientes");
   }
 
@@ -31,11 +24,13 @@ export async function obtenerClientes(): Promise<Cliente[]> {
 export async function crearCliente(datos: DatosCliente): Promise<Cliente> {
   const respuesta = await apiFetch("/clientes", {
     method: "POST",
-    headers: obtenerHeaders(),
     body: JSON.stringify(datos),
   });
 
   if (!respuesta.ok) {
+    const texto = await respuesta.text();
+    console.error("Error crearCliente:", texto);
+
     throw new Error("No se pudo crear el cliente");
   }
 
@@ -48,24 +43,41 @@ export async function actualizarCliente(
 ): Promise<Cliente> {
   const respuesta = await apiFetch(`/clientes/${id}`, {
     method: "PUT",
-    headers: obtenerHeaders(),
     body: JSON.stringify(datos),
   });
 
   if (!respuesta.ok) {
-    throw new Error("No se pudo actualizar el cliente");
+    const texto = await respuesta.text();
+
+    console.error("STATUS:", respuesta.status);
+    console.error("BACKEND:", texto);
+
+    let mensaje = "No se pudo actualizar el cliente";
+
+    try {
+      const datosError = JSON.parse(texto);
+
+      if (datosError.mensaje) {
+        mensaje = datosError.mensaje;
+      }
+    } catch {
+      // Si no era JSON, conservamos el mensaje genérico.
+    }
+
+    throw new Error(mensaje);
   }
 
   return respuesta.json();
 }
-
 export async function eliminarCliente(id: number): Promise<void> {
   const respuesta = await apiFetch(`/clientes/${id}`, {
     method: "DELETE",
-    headers: obtenerHeaders(),
   });
 
   if (!respuesta.ok) {
+    const texto = await respuesta.text();
+    console.error("Error eliminarCliente:", texto);
+
     throw new Error("No se pudo eliminar el cliente");
   }
 }

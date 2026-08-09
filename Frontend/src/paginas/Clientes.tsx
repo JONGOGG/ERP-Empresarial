@@ -16,8 +16,7 @@ export function Clientes() {
   const [telefono, setTelefono] = useState("");
   const [ciudad, setCiudad] = useState("");
 
-  const [clienteEditando, setClienteEditando] =
-    useState<Cliente | null>(null);
+  const [clienteEditando, setClienteEditando] = useState<Cliente | null>(null);
 
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
@@ -46,9 +45,7 @@ export function Clientes() {
     setClienteEditando(null);
   };
 
-  const guardarCliente = async (
-    event: React.FormEvent<HTMLFormElement>
-  ) => {
+  const guardarCliente = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (
@@ -72,31 +69,28 @@ export function Clientes() {
       setError("");
 
       if (clienteEditando) {
-        const actualizado = await actualizarCliente(
-          clienteEditando.id,
-          datos
-        );
+        const actualizado = await actualizarCliente(clienteEditando.id, datos);
 
         setClientes((clientesActuales) =>
           clientesActuales.map((cliente) =>
-            cliente.id === actualizado.id
-              ? actualizado
-              : cliente
-          )
+            cliente.id === actualizado.id ? actualizado : cliente,
+          ),
         );
       } else {
         const nuevo = await crearCliente(datos);
 
-        setClientes((clientesActuales) => [
-          ...clientesActuales,
-          nuevo,
-        ]);
+        setClientes((clientesActuales) => [...clientesActuales, nuevo]);
       }
 
       limpiarFormulario();
     } catch (error) {
       console.error(error);
-      setError("No se pudo guardar el cliente");
+
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("No se pudo actualizar el cliente");
+      }
     }
   };
 
@@ -113,9 +107,7 @@ export function Clientes() {
       await eliminarCliente(id);
 
       setClientes((clientesActuales) =>
-        clientesActuales.filter(
-          (cliente) => cliente.id !== id
-        )
+        clientesActuales.filter((cliente) => cliente.id !== id),
       );
 
       if (clienteEditando?.id === id) {
@@ -139,9 +131,7 @@ export function Clientes() {
             id="nombre"
             type="text"
             value={nombre}
-            onChange={(event) =>
-              setNombre(event.target.value)
-            }
+            onChange={(event) => setNombre(event.target.value)}
           />
         </div>
 
@@ -151,9 +141,7 @@ export function Clientes() {
             id="correo"
             type="email"
             value={correo}
-            onChange={(event) =>
-              setCorreo(event.target.value)
-            }
+            onChange={(event) => setCorreo(event.target.value)}
           />
         </div>
 
@@ -163,9 +151,7 @@ export function Clientes() {
             id="telefono"
             type="text"
             value={telefono}
-            onChange={(event) =>
-              setTelefono(event.target.value)
-            }
+            onChange={(event) => setTelefono(event.target.value)}
           />
         </div>
 
@@ -175,23 +161,16 @@ export function Clientes() {
             id="ciudad"
             type="text"
             value={ciudad}
-            onChange={(event) =>
-              setCiudad(event.target.value)
-            }
+            onChange={(event) => setCiudad(event.target.value)}
           />
         </div>
 
         <button type="submit">
-          {clienteEditando
-            ? "Guardar cambios"
-            : "Agregar cliente"}
+          {clienteEditando ? "Guardar cambios" : "Agregar cliente"}
         </button>
 
         {clienteEditando && (
-          <button
-            type="button"
-            onClick={limpiarFormulario}
-          >
+          <button type="button" onClick={limpiarFormulario}>
             Cancelar
           </button>
         )}
@@ -228,18 +207,14 @@ export function Clientes() {
                 <td>
                   <button
                     type="button"
-                    onClick={() =>
-                      seleccionarCliente(cliente)
-                    }
+                    onClick={() => seleccionarCliente(cliente)}
                   >
                     Editar
                   </button>
 
                   <button
                     type="button"
-                    onClick={() =>
-                      manejarEliminarCliente(cliente.id)
-                    }
+                    onClick={() => manejarEliminarCliente(cliente.id)}
                   >
                     Eliminar
                   </button>
