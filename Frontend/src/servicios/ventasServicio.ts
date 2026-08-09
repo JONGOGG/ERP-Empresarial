@@ -1,3 +1,4 @@
+import type { Venta } from "../tipos/Venta";
 import { apiFetch } from "./api";
 
 export interface ProductoVentaInput {
@@ -10,7 +11,9 @@ export interface CrearVentaInput {
   productos: ProductoVentaInput[];
 }
 
-export async function crearVenta(datos: CrearVentaInput) {
+export async function crearVenta(
+  datos: CrearVentaInput
+): Promise<Venta> {
   const respuesta = await apiFetch("/ventas", {
     method: "POST",
     body: JSON.stringify(datos),
@@ -27,11 +30,27 @@ export async function crearVenta(datos: CrearVentaInput) {
   return respuesta.json();
 }
 
-export async function obtenerVentas() {
+export async function obtenerVentas(): Promise<Venta[]> {
   const respuesta = await apiFetch("/ventas");
 
   if (!respuesta.ok) {
-    throw new Error("No se pudieron obtener las ventas");
+    throw new Error(
+      "No se pudieron obtener las ventas"
+    );
+  }
+
+  return respuesta.json();
+}
+
+export async function obtenerVentaPorId(
+  id: number
+): Promise<Venta> {
+  const respuesta = await apiFetch(`/ventas/${id}`);
+
+  if (!respuesta.ok) {
+    throw new Error(
+      "No se pudo obtener la venta"
+    );
   }
 
   return respuesta.json();
