@@ -1,19 +1,19 @@
 import { Router } from "express";
 
 import{
-  ListarClientes,
+  listarClientes,
   borrarCliente,
   editarCliente,
-  registratCliente
+  registrarCliente
   
 
-} from "../controllers/Clientes.controller.js"
+} from "../controllers/clientes.controller.js"
 
 
 const router = Router();
 
-router.get("/", ListarClientes);
-router.post("/", registratCliente);
+router.get("/", listarClientes);
+router.post("/", registrarCliente);
 router.put("/:id", editarCliente);
 router.delete("/:id", borrarCliente);
 

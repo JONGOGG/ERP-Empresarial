@@ -8,10 +8,9 @@ import {
   eliminarProducto,
 } from "../services/productos.service.js";
 
-export async function listarProductos(
-  _req: Request,
-  res: Response
-) {
+import { productoSchema } from "../schemas/productos.schema.js";
+
+export async function listarProductos(_req: Request, res: Response) {
   try {
     const productos = await obtenerProductos();
 
@@ -25,66 +24,18 @@ export async function listarProductos(
   }
 }
 
-export async function registrarProducto(
-  req: Request,
-  res: Response
-) {
+export async function registrarProducto(req: Request, res: Response) {
   try {
-    const {
-      nombre,
-      sku,
-      precio,
-      stock,
-      categoriaId,
-    } = req.body;
+    const resultado = productoSchema.safeParse(req.body);
 
-    if (
-      !nombre?.trim() ||
-      !sku?.trim() ||
-      precio === undefined ||
-      stock === undefined ||
-      !categoriaId
-    ) {
+    if (!resultado.success) {
       return res.status(400).json({
-        mensaje: "Todos los campos son obligatorios",
+        mensaje: "Datos inválidos",
+        errores: resultado.error.flatten().fieldErrors,
       });
     }
 
-    const precioNumero = Number(precio);
-    const stockNumero = Number(stock);
-    const categoriaNumero = Number(categoriaId);
-
-    if (
-      Number.isNaN(precioNumero) ||
-      precioNumero < 0
-    ) {
-      return res.status(400).json({
-        mensaje: "El precio no es válido",
-      });
-    }
-
-    if (
-      Number.isNaN(stockNumero) ||
-      stockNumero < 0
-    ) {
-      return res.status(400).json({
-        mensaje: "El stock no es válido",
-      });
-    }
-
-    if (Number.isNaN(categoriaNumero)) {
-      return res.status(400).json({
-        mensaje: "La categoría no es válida",
-      });
-    }
-
-    const producto = await crearProducto({
-      nombre: nombre.trim(),
-      sku: sku.trim(),
-      precio: precioNumero,
-      stock: stockNumero,
-      categoriaId: categoriaNumero,
-    });
+    const producto = await crearProducto(resultado.data);
 
     return res.status(201).json(producto);
   } catch (error) {
@@ -114,20 +65,9 @@ export async function registrarProducto(
   }
 }
 
-export async function editarProducto(
-  req: Request,
-  res: Response
-) {
+export async function editarProducto(req: Request, res: Response) {
   try {
     const id = Number(req.params.id);
-
-    const {
-      nombre,
-      sku,
-      precio,
-      stock,
-      categoriaId,
-    } = req.body;
 
     if (Number.isNaN(id)) {
       return res.status(400).json({
@@ -135,53 +75,16 @@ export async function editarProducto(
       });
     }
 
-    if (
-      !nombre?.trim() ||
-      !sku?.trim() ||
-      precio === undefined ||
-      stock === undefined ||
-      !categoriaId
-    ) {
+    const resultado = productoSchema.safeParse(req.body);
+
+    if (!resultado.success) {
       return res.status(400).json({
-        mensaje: "Todos los campos son obligatorios",
+        mensaje: "Datos inválidos",
+        errores: resultado.error.flatten().fieldErrors,
       });
     }
 
-    const precioNumero = Number(precio);
-    const stockNumero = Number(stock);
-    const categoriaNumero = Number(categoriaId);
-
-    if (
-      Number.isNaN(precioNumero) ||
-      precioNumero < 0
-    ) {
-      return res.status(400).json({
-        mensaje: "El precio no es válido",
-      });
-    }
-
-    if (
-      Number.isNaN(stockNumero) ||
-      stockNumero < 0
-    ) {
-      return res.status(400).json({
-        mensaje: "El stock no es válido",
-      });
-    }
-
-    if (Number.isNaN(categoriaNumero)) {
-      return res.status(400).json({
-        mensaje: "La categoría no es válida",
-      });
-    }
-
-    const producto = await actualizarProducto(id, {
-      nombre: nombre.trim(),
-      sku: sku.trim(),
-      precio: precioNumero,
-      stock: stockNumero,
-      categoriaId: categoriaNumero,
-    });
+    const producto = await actualizarProducto(id, resultado.data);
 
     return res.json(producto);
   } catch (error) {
@@ -211,10 +114,7 @@ export async function editarProducto(
   }
 }
 
-export async function borrarProducto(
-  req: Request,
-  res: Response
-) {
+export async function borrarProducto(req: Request, res: Response) {
   try {
     const id = Number(req.params.id);
 

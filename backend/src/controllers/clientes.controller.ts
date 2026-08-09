@@ -8,7 +8,12 @@ import {
   eliminarCliente,
 } from "../services/clientes.service.js";
 
-export async function ListarClientes(_req: Request, res: Response) {
+import { clienteSchema } from "../schemas/clientes.schema.js";
+
+export async function listarClientes(
+  _req: Request,
+  res: Response
+) {
   try {
     const clientes = await obtenerClientes();
 
@@ -22,68 +27,73 @@ export async function ListarClientes(_req: Request, res: Response) {
   }
 }
 
-export async function registratCliente(req: Request, res: Response) {
+export async function registrarCliente(
+  req: Request,
+  res: Response
+) {
   try {
-    const { nombre, correo, telefono, ciudad } = req.body;
-    if (
-      !nombre.trim() ||
-      !correo.trim() ||
-      !telefono.trim() ||
-      !ciudad.trim()
-    ) {
+    const resultado = clienteSchema.safeParse(req.body);
+
+    if (!resultado.success) {
       return res.status(400).json({
-        mensaje: "Todos los campos son obligatorios",
+        mensaje: "Datos inválidos",
+        errores: resultado.error.flatten().fieldErrors,
       });
     }
 
-    const cliente = await crearCliente({
-      nombre: nombre.trim(),
-      correo: correo.trim(),
-      telefono: telefono.trim(),
-      ciudad: ciudad.trim(),
-    });
+    const cliente = await crearCliente(resultado.data);
+
     return res.status(201).json(cliente);
   } catch (error) {
     console.error(error);
+
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return res.status(409).json({
+        mensaje: "Ya existe un cliente con ese correo",
+      });
+    }
+
     return res.status(500).json({
       mensaje: "Error al crear el cliente",
     });
   }
 }
 
-export async function editarCliente(req: Request, res: Response) {
+export async function editarCliente(
+  req: Request,
+  res: Response
+) {
   try {
     const id = Number(req.params.id);
-    const { nombre, correo, telefono, ciudad, } = req.body;
 
     if (Number.isNaN(id)) {
       return res.status(400).json({
-        mensaje: "ID invalido",
+        mensaje: "ID inválido",
       });
     }
 
-    if (
-      !nombre?.trim() ||
-      !correo?.trim() ||
-      !telefono?.trim() ||
-      !ciudad?.trim()
-    ) {
+    const resultado = clienteSchema.safeParse(req.body);
+
+    if (!resultado.success) {
       return res.status(400).json({
-        mensaje: "Todos los campos son obligatorios",
+        mensaje: "Datos inválidos",
+        errores: resultado.error.flatten().fieldErrors,
       });
     }
 
-    const cliente = await actualizarCliente(id, {
-      nombre: nombre.trim(),
-      correo: correo.trim(),
-      telefono: telefono.trim(),
-      ciudad: ciudad.trim(),
-    });
+    const cliente = await actualizarCliente(
+      id,
+      resultado.data
+    );
 
     return res.json(cliente);
   } catch (error) {
     console.error(error);
- if (
+
+    if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2002"
     ) {
@@ -105,20 +115,20 @@ export async function borrarCliente(
   try {
     const id = Number(req.params.id);
 
-    if(Number.isNaN(id)){
+    if (Number.isNaN(id)) {
       return res.status(400).json({
         mensaje: "ID inválido",
       });
     }
 
-    await  eliminarCliente(id);
-    return res.status(204).send()
-    
+    await eliminarCliente(id);
+
+    return res.status(204).send();
   } catch (error) {
     console.error(error);
+
     return res.status(500).json({
-      mensaje:" Error al eliminar cliente"
-    })
-    
+      mensaje: "Error al eliminar cliente",
+    });
   }
 }

@@ -7,10 +7,9 @@ import {
   eliminarCategoria,
 } from "../services/categorias.service.js";
 
-export async function listarCategorias(
-  _req: Request,
-  res: Response
-) {
+import { categoriasSchema } from "../schemas/categorias.schema.js";
+
+export async function listarCategorias(_req: Request, res: Response) {
   try {
     const categorias = await obtenerCategorias();
 
@@ -24,23 +23,17 @@ export async function listarCategorias(
   }
 }
 
-export async function registrarCategoria(
-  req: Request,
-  res: Response
-) {
+export async function registrarCategoria(req: Request, res: Response) {
   try {
-    const { nombre, descripcion } = req.body;
+    const resultado = categoriasSchema.safeParse(req.body);
 
-    if (!nombre?.trim()) {
+    if (!resultado.success) {
       return res.status(400).json({
         mensaje: "El nombre es obligatorio",
       });
     }
 
-    const categoria = await crearCategoria({
-      nombre: nombre.trim(),
-      descripcion: descripcion?.trim(),
-    });
+    const categoria = await crearCategoria(resultado.data);
 
     return res.status(201).json(categoria);
   } catch (error) {
@@ -52,13 +45,9 @@ export async function registrarCategoria(
   }
 }
 
-export async function editarCategoria(
-  req: Request,
-  res: Response
-) {
+export async function editarCategoria(req: Request, res: Response) {
   try {
     const id = Number(req.params.id);
-    const { nombre, descripcion } = req.body;
 
     if (Number.isNaN(id)) {
       return res.status(400).json({
@@ -66,16 +55,16 @@ export async function editarCategoria(
       });
     }
 
-    if (!nombre?.trim()) {
+    const resultado = categoriasSchema.safeParse(req.body);
+
+    if (!resultado.success) {
       return res.status(400).json({
         mensaje: "El nombre es obligatorio",
+        errores: resultado.error.flatten().fieldErrors,
       });
     }
 
-    const categoria = await actualizarCategoria(id, {
-      nombre: nombre.trim(),
-      descripcion: descripcion?.trim(),
-    });
+    const categoria = await actualizarCategoria(id, resultado.data);
 
     return res.json(categoria);
   } catch (error) {
@@ -87,10 +76,7 @@ export async function editarCategoria(
   }
 }
 
-export async function borrarCategoria(
-  req: Request,
-  res: Response
-) {
+export async function borrarCategoria(req: Request, res: Response) {
   try {
     const id = Number(req.params.id);
 
