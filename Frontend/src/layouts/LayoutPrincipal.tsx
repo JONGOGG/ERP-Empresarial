@@ -27,6 +27,8 @@ export function LayoutPrincipal() {
           <NavLink to="/categorias">Categorías</NavLink>
 
           <NavLink to="/clientes">Clientes</NavLink>
+
+          <NavLink to="/ventas">Ventas</NavLink>
         </nav>
       </aside>
 

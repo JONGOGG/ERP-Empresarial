@@ -5,6 +5,7 @@ import { Panel } from "./paginas/Panel";
 import { Productos } from "./paginas/Productos";
 import { Categorias } from "./paginas/Categorias";
 import { Clientes } from "./paginas/Clientes";
+import { Ventas } from "./paginas/Ventas";
 
 import { LayoutPrincipal } from "./layouts/LayoutPrincipal";
 import { RutaProtegida } from "./rutas/RutaProtegida";
@@ -26,6 +27,9 @@ function App() {
             <Route path="/categorias" element={<Categorias />} />
 
             <Route path="/clientes" element={<Clientes />} />
+
+            <Route path="/ventas" element={<Ventas />} />
+            
           </Route>
         </Route>
       </Routes>
