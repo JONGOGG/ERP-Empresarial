@@ -45,7 +45,7 @@ router.post("/registro", async (req, res) => {
         nombre,
         correo,
         password: passwordCifrado,
-        rol: "ADMIN",
+        rol: "EMPLEADO",
       },
     });
 

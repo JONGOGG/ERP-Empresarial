@@ -28,6 +28,8 @@ model Producto {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  detallesVenta DetalleVenta[]
 }
 
 model Cliente {
@@ -38,6 +40,8 @@ model Cliente {
   ciudad    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  ventas Venta[]
 }
 
 enum Rol {
@@ -53,4 +57,32 @@ model Usuario {
   rol       Rol      @default(EMPLEADO)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  ventas Venta[]
+}
+
+model Venta {
+  id        Int      @id @default(autoincrement())
+  total     Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+
+  clienteId Int
+  cliente   Cliente @relation(fields: [clienteId], references: [id])
+
+  usuarioId Int
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+
+  detalles DetalleVenta[]
+}
+
+model DetalleVenta {
+  id             Int     @id @default(autoincrement())
+  cantidad       Int
+  precioUnitario Decimal @db.Decimal(10, 2)
+
+  ventaId Int
+  venta   Venta @relation(fields: [ventaId], references: [id])
+
+  productoId Int
+  producto   Producto @relation(fields: [productoId], references: [id])
 }
