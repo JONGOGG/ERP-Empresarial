@@ -1,4 +1,4 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 
 import {
@@ -12,24 +12,22 @@ import { clienteSchema } from "../schemas/clientes.schema.js";
 
 export async function listarClientes(
   _req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction,
 ) {
   try {
     const clientes = await obtenerClientes();
 
     return res.json(clientes);
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      mensaje: "Error al obtener los clientes",
-    });
+    next(error);
   }
 }
 
 export async function registrarCliente(
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction,
 ) {
   try {
     const resultado = clienteSchema.safeParse(req.body);
@@ -45,16 +43,7 @@ export async function registrarCliente(
 
     return res.status(201).json(cliente);
   } catch (error) {
-    console.error(error);
-
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2002"
-    ) {
-      return res.status(409).json({
-        mensaje: "Ya existe un cliente con ese correo",
-      });
-    }
+    next(error);
 
     return res.status(500).json({
       mensaje: "Error al crear el cliente",
@@ -64,7 +53,8 @@ export async function registrarCliente(
 
 export async function editarCliente(
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction,
 ) {
   try {
     const id = Number(req.params.id);
@@ -84,33 +74,18 @@ export async function editarCliente(
       });
     }
 
-    const cliente = await actualizarCliente(
-      id,
-      resultado.data
-    );
+    const cliente = await actualizarCliente(id, resultado.data);
 
     return res.json(cliente);
   } catch (error) {
-    console.error(error);
-
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2002"
-    ) {
-      return res.status(409).json({
-        mensaje: "Ya existe otro cliente con ese correo",
-      });
-    }
-
-    return res.status(500).json({
-      mensaje: "Error al actualizar el cliente",
-    });
+    next(error);
   }
 }
 
 export async function borrarCliente(
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction,
 ) {
   try {
     const id = Number(req.params.id);
@@ -125,10 +100,6 @@ export async function borrarCliente(
 
     return res.status(204).send();
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      mensaje: "Error al eliminar cliente",
-    });
+    next(error);
   }
 }

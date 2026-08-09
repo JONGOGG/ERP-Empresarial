@@ -18,7 +18,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use(manejarErrores);
+
 
 app.use("/api/auth", authRoutes);
 
@@ -31,6 +31,8 @@ app.get("/api", (_req, res) => {
     mensaje: "API del ERP funcionando",
   });
 });
+
+app.use(manejarErrores);
 
 const PORT = process.env.PORT || 3001;
 

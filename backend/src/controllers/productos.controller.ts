@@ -1,4 +1,4 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 
 import {
@@ -10,21 +10,25 @@ import {
 
 import { productoSchema } from "../schemas/productos.schema.js";
 
-export async function listarProductos(_req: Request, res: Response) {
+export async function listarProductos(
+  _req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   try {
     const productos = await obtenerProductos();
 
     return res.json(productos);
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      mensaje: "Error al obtener los productos",
-    });
+    next(error);
   }
 }
 
-export async function registrarProducto(req: Request, res: Response) {
+export async function registrarProducto(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   try {
     const resultado = productoSchema.safeParse(req.body);
 
@@ -39,33 +43,15 @@ export async function registrarProducto(req: Request, res: Response) {
 
     return res.status(201).json(producto);
   } catch (error) {
-    console.error(error);
-
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2002"
-    ) {
-      return res.status(409).json({
-        mensaje: "Ya existe un producto con ese SKU",
-      });
-    }
-
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2003"
-    ) {
-      return res.status(400).json({
-        mensaje: "La categoría seleccionada no existe",
-      });
-    }
-
-    return res.status(500).json({
-      mensaje: "Error al crear el producto",
-    });
+    next(error);
   }
 }
 
-export async function editarProducto(req: Request, res: Response) {
+export async function editarProducto(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   try {
     const id = Number(req.params.id);
 
@@ -88,33 +74,15 @@ export async function editarProducto(req: Request, res: Response) {
 
     return res.json(producto);
   } catch (error) {
-    console.error(error);
-
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2002"
-    ) {
-      return res.status(409).json({
-        mensaje: "Ya existe otro producto con ese SKU",
-      });
-    }
-
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2003"
-    ) {
-      return res.status(400).json({
-        mensaje: "La categoría seleccionada no existe",
-      });
-    }
-
-    return res.status(500).json({
-      mensaje: "Error al actualizar el producto",
-    });
+    next(error);
   }
 }
 
-export async function borrarProducto(req: Request, res: Response) {
+export async function borrarProducto(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   try {
     const id = Number(req.params.id);
 
@@ -128,10 +96,6 @@ export async function borrarProducto(req: Request, res: Response) {
 
     return res.status(204).send();
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      mensaje: "Error al eliminar el producto",
-    });
+    next(error);
   }
 }

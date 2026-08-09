@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { permitirRoles } from "../middlewares/roles.middleware.js";
 
 import {
   listarProductos,
@@ -10,8 +11,8 @@ import {
 const router = Router();
 
 router.get("/", listarProductos);
-router.post("/", registrarProducto);
-router.put("/:id", editarProducto);
-router.delete("/:id", borrarProducto);
+router.post("/", permitirRoles("ADMIN"), registrarProducto);
+router.put("/:id", permitirRoles("ADMIN"), editarProducto);
+router.delete("/:id", permitirRoles("ADMIN"), borrarProducto);
 
 export default router;

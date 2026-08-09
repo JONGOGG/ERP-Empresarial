@@ -1,4 +1,4 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 
 import {
   obtenerCategorias,
@@ -11,24 +11,22 @@ import { categoriasSchema } from "../schemas/categorias.schema.js";
 
 export async function listarCategorias(
   _req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction,
 ) {
   try {
     const categorias = await obtenerCategorias();
 
     return res.json(categorias);
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      mensaje: "Error al obtener las categorías",
-    });
+    next(error);
   }
 }
 
 export async function registrarCategoria(
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction,
 ) {
   try {
     const resultado = categoriasSchema.safeParse(req.body);
@@ -41,24 +39,17 @@ export async function registrarCategoria(
     }
 
     const categoria = await crearCategoria({
-  nombre: resultado.data.nombre,
-  descripcion: resultado.data.descripcion ?? null,
-});
+      nombre: resultado.data.nombre,
+      descripcion: resultado.data.descripcion ?? null,
+    });
 
     return res.status(201).json(categoria);
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      mensaje: "Error al crear la categoría",
-    });
+    next(error);
   }
 }
 
-export async function editarCategoria(
-  req: Request,
-  res: Response
-) {
+export async function editarCategoria(req: Request, res: Response, next: NextFunction,) {
   try {
     const id = Number(req.params.id);
 
@@ -77,28 +68,18 @@ export async function editarCategoria(
       });
     }
 
-    const categoria = await actualizarCategoria(
-  id,
-  {
-    nombre: resultado.data.nombre,
-    descripcion: resultado.data.descripcion ?? null,
-  }
-);
+    const categoria = await actualizarCategoria(id, {
+      nombre: resultado.data.nombre,
+      descripcion: resultado.data.descripcion ?? null,
+    });
 
     return res.json(categoria);
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      mensaje: "Error al actualizar la categoría",
-    });
+    next(error);
   }
 }
 
-export async function borrarCategoria(
-  req: Request,
-  res: Response
-) {
+export async function borrarCategoria(req: Request, res: Response, next: NextFunction,) {
   try {
     const id = Number(req.params.id);
 
@@ -112,10 +93,6 @@ export async function borrarCategoria(
 
     return res.status(204).send();
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      mensaje: "Error al eliminar la categoría",
-    });
+    next(error);
   }
 }

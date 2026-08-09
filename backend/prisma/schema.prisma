@@ -40,12 +40,17 @@ model Cliente {
   updatedAt DateTime @updatedAt
 }
 
+enum Rol {
+  ADMIN
+  EMPLEADO
+}
+
 model Usuario {
   id        Int      @id @default(autoincrement())
   nombre    String
   correo    String   @unique
   password  String
-  rol       String   @default("ADMIN")
+  rol       Rol      @default(EMPLEADO)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
