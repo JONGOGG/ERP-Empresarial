@@ -42,3 +42,22 @@ export async function obtenerVentasUltimos7Dias(): Promise<VentaDia[]> {
 
   return respuesta.json();
 }
+
+export interface ProductoMasVendido {
+  productoId: number;
+  nombre: string;
+  sku: string;
+  cantidadVendida: number;
+}
+
+export async function obtenerProductosMasVendidos(): Promise<
+  ProductoMasVendido[]
+> {
+  const respuesta = await apiFetch("/dashboard/productos-mas-vendidos");
+
+  if (!respuesta.ok) {
+    throw new Error("No se pudieron obtener los productos más vendidos");
+  }
+
+  return respuesta.json();
+}

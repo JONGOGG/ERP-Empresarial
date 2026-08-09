@@ -3,6 +3,7 @@ import type { NextFunction, Request, Response } from "express";
 import {
   obtenerResumenDashboard,
   obtenerVentasUltimos7Dias,
+  obtenerProductosMasVendidos,
 } from "../services/dashboard.service.js";
 
 export async function resumenDashboard(
@@ -28,6 +29,20 @@ export async function ventasUltimos7Dias(
     const datos = await obtenerVentasUltimos7Dias();
 
     return res.json(datos);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function productosMasVendidos(
+  _req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const productos = await obtenerProductosMasVendidos();
+
+    return res.json(productos);
   } catch (error) {
     next(error);
   }

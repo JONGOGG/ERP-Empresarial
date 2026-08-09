@@ -64,9 +64,8 @@ export async function obtenerResumenDashboard() {
   ]);
 
   const valorInventario = productosInventario.reduce(
-    (total, producto) =>
-      total + Number(producto.precio) * producto.stock,
-    0
+    (total, producto) => total + Number(producto.precio) * producto.stock,
+    0,
   );
 
   return {
@@ -112,9 +111,7 @@ export async function obtenerVentasUltimos7Dias() {
     siguienteDia.setDate(siguienteDia.getDate() + 1);
 
     const ventasDia = ventas.filter(
-      (venta) =>
-        venta.createdAt >= fecha &&
-        venta.createdAt < siguienteDia
+      (venta) => venta.createdAt >= fecha && venta.createdAt < siguienteDia,
     );
 
     dias.push({
@@ -123,12 +120,56 @@ export async function obtenerVentasUltimos7Dias() {
       ventas: ventasDia.length,
 
       ingresos: ventasDia.reduce(
-        (total, venta) =>
-          total + Number(venta.total),
-        0
+        (total, venta) => total + Number(venta.total),
+        0,
       ),
     });
   }
 
   return dias;
+}
+
+export async function obtenerProductosMasVendidos() {
+  const productos = await prisma.detalleVenta.groupBy({
+    by: ["productoId"],
+
+    _sum: {
+      cantidad: true,
+    },
+
+    orderBy: {
+      _sum: {
+        cantidad: "desc",
+      },
+    },
+
+    take: 5,
+  });
+
+  const ids = productos.map((producto) => producto.productoId);
+
+  const datosProductos = await prisma.producto.findMany({
+    where: {
+      id: {
+        in: ids,
+      },
+    },
+
+    select: {
+      id: true,
+      nombre: true,
+      sku: true,
+    },
+  });
+
+  return productos.map((item) => {
+    const producto = datosProductos.find((p) => p.id === item.productoId);
+
+    return {
+      productoId: item.productoId,
+      nombre: producto?.nombre ?? "Producto",
+      sku: producto?.sku ?? "",
+      cantidadVendida: item._sum.cantidad ?? 0,
+    };
+  });
 }

@@ -3,8 +3,10 @@ import { useEffect, useState } from "react";
 import {
   obtenerResumenDashboard,
   obtenerVentasUltimos7Dias,
+  obtenerProductosMasVendidos,
   type ResumenDashboard,
   type VentaDia,
+  type ProductoMasVendido,
 } from "../servicios/dashboardServicio";
 
 import {
@@ -18,11 +20,13 @@ import {
 } from "recharts";
 
 export function Dashboard() {
-  const [resumen, setResumen] =
-    useState<ResumenDashboard | null>(null);
+  const [resumen, setResumen] = useState<ResumenDashboard | null>(null);
 
-  const [ventas7Dias, setVentas7Dias] =
-    useState<VentaDia[]>([]);
+  const [ventas7Dias, setVentas7Dias] = useState<VentaDia[]>([]);
+
+  const [productosMasVendidos, setProductosMasVendidos] = useState<
+    ProductoMasVendido[]
+  >([]);
 
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
@@ -32,13 +36,15 @@ export function Dashboard() {
       try {
         setError("");
 
-        const [resumenDB, ventasDB] = await Promise.all([
+        const [resumenDB, ventasDB, productosDB] = await Promise.all([
           obtenerResumenDashboard(),
           obtenerVentasUltimos7Dias(),
+          obtenerProductosMasVendidos(),
         ]);
 
         setResumen(resumenDB);
         setVentas7Dias(ventasDB);
+        setProductosMasVendidos(productosDB);
       } catch (error) {
         console.error(error);
 
@@ -108,10 +114,7 @@ export function Dashboard() {
 
         <article>
           <h3>Stock bajo</h3>
-
-          <strong>
-            {resumen.productosStockBajo.length}
-          </strong>
+          <strong>{resumen.productosStockBajo.length}</strong>
         </article>
 
         <article>
@@ -136,23 +139,17 @@ export function Dashboard() {
             height: 300,
           }}
         >
-          <ResponsiveContainer
-            width="100%"
-            height="100%"
-          >
+          <ResponsiveContainer width="100%" height="100%">
             <LineChart data={ventas7Dias}>
               <CartesianGrid strokeDasharray="3 3" />
 
               <XAxis
                 dataKey="fecha"
                 tickFormatter={(fecha) =>
-                  new Date(fecha).toLocaleDateString(
-                    "es-MX",
-                    {
-                      day: "2-digit",
-                      month: "2-digit",
-                    }
-                  )
+                  new Date(fecha).toLocaleDateString("es-MX", {
+                    day: "2-digit",
+                    month: "2-digit",
+                  })
                 }
               />
 
@@ -160,33 +157,53 @@ export function Dashboard() {
 
               <Tooltip
                 formatter={(valor) => [
-                  `$${Number(valor).toLocaleString(
-                    "es-MX",
-                    {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    }
-                  )}`,
+                  `$${Number(valor).toLocaleString("es-MX", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}`,
                   "Ingresos",
                 ]}
               />
 
-              <Line
-                type="monotone"
-                dataKey="ingresos"
-              />
+              <Line type="monotone" dataKey="ingresos" />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </section>
 
       <section>
+        <h2>Top 5 productos más vendidos</h2>
+
+        {productosMasVendidos.length === 0 ? (
+          <p>No hay ventas suficientes todavía.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>SKU</th>
+                <th>Unidades vendidas</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {productosMasVendidos.map((producto) => (
+                <tr key={producto.productoId}>
+                  <td>{producto.nombre}</td>
+                  <td>{producto.sku}</td>
+                  <td>{producto.cantidadVendida}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
+
+      <section>
         <h2>Productos con stock bajo</h2>
 
         {resumen.productosStockBajo.length === 0 ? (
-          <p>
-            No hay productos con stock bajo.
-          </p>
+          <p>No hay productos con stock bajo.</p>
         ) : (
           <table>
             <thead>
@@ -198,15 +215,13 @@ export function Dashboard() {
             </thead>
 
             <tbody>
-              {resumen.productosStockBajo.map(
-                (producto) => (
-                  <tr key={producto.id}>
-                    <td>{producto.nombre}</td>
-                    <td>{producto.sku}</td>
-                    <td>{producto.stock}</td>
-                  </tr>
-                )
-              )}
+              {resumen.productosStockBajo.map((producto) => (
+                <tr key={producto.id}>
+                  <td>{producto.nombre}</td>
+                  <td>{producto.sku}</td>
+                  <td>{producto.stock}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         )}
