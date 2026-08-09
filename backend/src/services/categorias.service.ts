@@ -10,12 +10,12 @@ export function obtenerCategorias() {
 
 export function crearCategoria(datos: {
   nombre: string;
-  descripcion?: string;
+  descripcion: string | null;
 }) {
   return prisma.categoria.create({
     data: {
       nombre: datos.nombre,
-      descripcion: datos.descripcion ?? null,
+      descripcion: datos.descripcion,
     },
   });
 }
@@ -24,14 +24,14 @@ export function actualizarCategoria(
   id: number,
   datos: {
     nombre: string;
-    descripcion?: string;
+    descripcion: string | null;
   }
 ) {
   return prisma.categoria.update({
     where: { id },
     data: {
       nombre: datos.nombre,
-      descripcion: datos.descripcion ?? null,
+      descripcion: datos.descripcion,
     },
   });
 }

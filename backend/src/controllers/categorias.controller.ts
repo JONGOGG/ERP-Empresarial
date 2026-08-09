@@ -9,7 +9,10 @@ import {
 
 import { categoriasSchema } from "../schemas/categorias.schema.js";
 
-export async function listarCategorias(_req: Request, res: Response) {
+export async function listarCategorias(
+  _req: Request,
+  res: Response
+) {
   try {
     const categorias = await obtenerCategorias();
 
@@ -23,17 +26,24 @@ export async function listarCategorias(_req: Request, res: Response) {
   }
 }
 
-export async function registrarCategoria(req: Request, res: Response) {
+export async function registrarCategoria(
+  req: Request,
+  res: Response
+) {
   try {
     const resultado = categoriasSchema.safeParse(req.body);
 
     if (!resultado.success) {
       return res.status(400).json({
-        mensaje: "El nombre es obligatorio",
+        mensaje: "Datos inválidos",
+        errores: resultado.error.flatten().fieldErrors,
       });
     }
 
-    const categoria = await crearCategoria(resultado.data);
+    const categoria = await crearCategoria({
+  nombre: resultado.data.nombre,
+  descripcion: resultado.data.descripcion ?? null,
+});
 
     return res.status(201).json(categoria);
   } catch (error) {
@@ -45,7 +55,10 @@ export async function registrarCategoria(req: Request, res: Response) {
   }
 }
 
-export async function editarCategoria(req: Request, res: Response) {
+export async function editarCategoria(
+  req: Request,
+  res: Response
+) {
   try {
     const id = Number(req.params.id);
 
@@ -59,12 +72,18 @@ export async function editarCategoria(req: Request, res: Response) {
 
     if (!resultado.success) {
       return res.status(400).json({
-        mensaje: "El nombre es obligatorio",
+        mensaje: "Datos inválidos",
         errores: resultado.error.flatten().fieldErrors,
       });
     }
 
-    const categoria = await actualizarCategoria(id, resultado.data);
+    const categoria = await actualizarCategoria(
+  id,
+  {
+    nombre: resultado.data.nombre,
+    descripcion: resultado.data.descripcion ?? null,
+  }
+);
 
     return res.json(categoria);
   } catch (error) {
@@ -76,7 +95,10 @@ export async function editarCategoria(req: Request, res: Response) {
   }
 }
 
-export async function borrarCategoria(req: Request, res: Response) {
+export async function borrarCategoria(
+  req: Request,
+  res: Response
+) {
   try {
     const id = Number(req.params.id);
 

@@ -6,7 +6,10 @@ import categoriasRoutes from "./routes/categorias.routes.js";
 import productosRoutes from "./routes/productos.routes.js";
 import clientesRoutes from "./routes/clientes.routes.js";
 import authRoutes from "./routes/auth.routes.js";
+
+
 import { verificarToken } from "./middlewares/autenticacion.middleware.js";
+import { manejarErrores } from "./middlewares/error.middleware.js";
 
 dotenv.config();
 
@@ -14,6 +17,8 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+app.use(manejarErrores);
 
 app.use("/api/auth", authRoutes);
 
