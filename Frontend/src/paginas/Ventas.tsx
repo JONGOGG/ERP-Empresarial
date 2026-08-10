@@ -55,7 +55,7 @@ export function Ventas() {
     }
 
     const producto = productos.find(
-      (item) => item.id === productoNumero
+      (item) => Number(item.id) === productoNumero,
     );
 
     if (!producto) {
@@ -69,31 +69,30 @@ export function Ventas() {
     }
 
     const existente = detalles.find(
-      (detalle) => detalle.productoId === productoNumero
+      (detalle) => Number(detalle.productoId) === productoNumero,
     );
 
     if (existente) {
-      const nuevaCantidad =
-        existente.cantidad + cantidadNumero;
+      const nuevaCantidad = Number(existente.cantidad) + cantidadNumero;
 
       if (nuevaCantidad > producto.stock) {
         setError("La cantidad total supera el stock disponible");
         return;
       }
 
-      setDetalles(
-        detalles.map((detalle) =>
-          detalle.productoId === productoNumero
+      setDetalles((detallesActuales) =>
+        detallesActuales.map((detalle) =>
+          Number(detalle.productoId) === productoNumero
             ? {
                 ...detalle,
                 cantidad: nuevaCantidad,
               }
-            : detalle
-        )
+            : detalle,
+        ),
       );
     } else {
-      setDetalles([
-        ...detalles,
+      setDetalles((detallesActuales) => [
+        ...detallesActuales,
         {
           productoId: productoNumero,
           cantidad: cantidadNumero,
@@ -107,29 +106,54 @@ export function Ventas() {
   };
 
   const eliminarDetalle = (productoId: number) => {
-    setDetalles(
-      detalles.filter(
-        (detalle) => detalle.productoId !== productoId
-      )
+    setDetalles((detallesActuales) =>
+      detallesActuales.filter(
+        (detalle) => Number(detalle.productoId) !== Number(productoId),
+      ),
     );
   };
 
+  // ==========================================
+  // OBTENER SUBTOTAL
+  // ==========================================
+
+  const obtenerSubtotal = (productoId: number, cantidad: number) => {
+    const producto = productos.find(
+      (producto) => Number(producto.id) === Number(productoId),
+    );
+
+    if (!producto) {
+      return 0;
+    }
+
+    const precioNumero = Number(producto.precio);
+    const cantidadNumero = Number(cantidad);
+
+    if (Number.isNaN(precioNumero) || Number.isNaN(cantidadNumero)) {
+      return 0;
+    }
+
+    return precioNumero * cantidadNumero;
+  };
+
+  // ==========================================
+  // TOTAL DE LA VENTA
+  // ==========================================
+
   const total = useMemo(() => {
-    return detalles.reduce((acumulado, detalle) => {
-      const producto = productos.find(
-        (item) => item.id === detalle.productoId
-      );
-
-      if (!producto) {
-        return acumulado;
-      }
-
-      return (
-        acumulado +
-        Number(producto.precio) * detalle.cantidad
-      );
-    }, 0);
+    return detalles.reduce(
+      (acumulado, detalle) =>
+        acumulado + obtenerSubtotal(detalle.productoId, detalle.cantidad),
+      0,
+    );
   }, [detalles, productos]);
+
+  const totalUnidades = useMemo(() => {
+    return detalles.reduce(
+      (acumulado, detalle) => acumulado + Number(detalle.cantidad),
+      0,
+    );
+  }, [detalles]);
 
   const registrarVenta = async () => {
     if (!clienteId) {
@@ -155,12 +179,11 @@ export function Ventas() {
       setMensaje("Venta registrada correctamente");
 
       setClienteId("");
+      setProductoId("");
+      setCantidad("1");
       setDetalles([]);
 
-      // Volvemos a consultar productos para obtener
-      // el stock actualizado después de la venta.
-      const productosActualizados =
-        await obtenerProductos();
+      const productosActualizados = await obtenerProductos();
 
       setProductos(productosActualizados);
     } catch (error) {
@@ -176,186 +199,301 @@ export function Ventas() {
     }
   };
 
+  const inputClass =
+    "w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20";
+
+  const labelClass = "mb-1.5 block text-sm font-medium text-foreground";
+
   return (
-    <section>
-      <h1>Ventas</h1>
-      <p>Registra una nueva venta.</p>
-
-      {error && <p>{error}</p>}
-      {mensaje && <p>{mensaje}</p>}
+    <div className="space-y-6">
+      {/* ENCABEZADO */}
 
       <div>
-        <label htmlFor="cliente">
-          Cliente
-        </label>
+        <h1 className="text-3xl font-bold tracking-tight">Nueva venta</h1>
 
-        <select
-          id="cliente"
-          value={clienteId}
-          onChange={(event) =>
-            setClienteId(event.target.value)
-          }
-        >
-          <option value="">
-            Selecciona un cliente
-          </option>
-
-          {clientes.map((cliente) => (
-            <option
-              key={cliente.id}
-              value={cliente.id}
-            >
-              {cliente.nombre}
-            </option>
-          ))}
-        </select>
+        <p className="mt-1 text-muted-foreground">
+          Registra productos y genera una nueva venta.
+        </p>
       </div>
 
-      <hr />
+      {/* ERROR */}
 
-      <div>
-        <label htmlFor="producto">
-          Producto
-        </label>
-
-        <select
-          id="producto"
-          value={productoId}
-          onChange={(event) =>
-            setProductoId(event.target.value)
-          }
-        >
-          <option value="">
-            Selecciona un producto
-          </option>
-
-          {productos.map((producto) => (
-            <option
-              key={producto.id}
-              value={producto.id}
-              disabled={producto.stock === 0}
-            >
-              {producto.nombre}
-              {" - "}
-              ${Number(producto.precio).toFixed(2)}
-              {" - Stock: "}
-              {producto.stock}
-            </option>
-          ))}
-        </select>
-
-        <label htmlFor="cantidad">
-          Cantidad
-        </label>
-
-        <input
-          id="cantidad"
-          type="number"
-          min="1"
-          value={cantidad}
-          onChange={(event) =>
-            setCantidad(event.target.value)
-          }
-        />
-
-        <button
-          type="button"
-          onClick={agregarProducto}
-        >
-          Agregar
-        </button>
-      </div>
-
-      <hr />
-
-      {detalles.length === 0 ? (
-        <p>No hay productos agregados.</p>
-      ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Producto</th>
-              <th>Precio</th>
-              <th>Cantidad</th>
-              <th>Subtotal</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {detalles.map((detalle) => {
-              const producto = productos.find(
-                (item) =>
-                  item.id === detalle.productoId
-              );
-
-              if (!producto) {
-                return null;
-              }
-
-              const subtotal =
-                Number(producto.precio) *
-                detalle.cantidad;
-
-              return (
-                <tr key={detalle.productoId}>
-                  <td>{producto.nombre}</td>
-
-                  <td>
-                    $
-                    {Number(
-                      producto.precio
-                    ).toFixed(2)}
-                  </td>
-
-                  <td>
-                    {detalle.cantidad}
-                  </td>
-
-                  <td>
-                    ${subtotal.toFixed(2)}
-                  </td>
-
-                  <td>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        eliminarDetalle(
-                          detalle.productoId
-                        )
-                      }
-                    >
-                      Eliminar
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      {error && (
+        <div className="rounded-lg border border-danger/20 bg-danger/5 p-4">
+          <p className="text-sm font-medium text-danger">{error}</p>
+        </div>
       )}
 
-      <h2>
-        Total: $
-        {total.toLocaleString("es-MX", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}
-      </h2>
+      {/* MENSAJE */}
 
-      <button
-        type="button"
-        disabled={
-          guardando ||
-          !clienteId ||
-          detalles.length === 0
-        }
-        onClick={registrarVenta}
-      >
-        {guardando
-          ? "Registrando..."
-          : "Registrar venta"}
-      </button>
-    </section>
+      {mensaje && (
+        <div className="rounded-lg border border-success/20 bg-success/5 p-4">
+          <p className="text-sm font-medium text-success">{mensaje}</p>
+        </div>
+      )}
+
+      <div className="grid gap-6 xl:grid-cols-[1fr_340px]">
+        {/* COLUMNA IZQUIERDA */}
+
+        <div className="space-y-6">
+          {/* CLIENTE */}
+
+          <section className="rounded-xl border border-border bg-surface shadow-sm">
+            <div className="border-b border-border px-6 py-4">
+              <h2 className="text-lg font-semibold">Cliente</h2>
+
+              <p className="mt-1 text-sm text-muted-foreground">
+                Selecciona el cliente de la venta.
+              </p>
+            </div>
+
+            <div className="p-6">
+              <label htmlFor="cliente" className={labelClass}>
+                Cliente
+              </label>
+
+              <select
+                id="cliente"
+                value={clienteId}
+                onChange={(event) => setClienteId(event.target.value)}
+                className={inputClass}
+              >
+                <option value="">Selecciona un cliente</option>
+
+                {clientes.map((cliente) => (
+                  <option key={cliente.id} value={cliente.id}>
+                    {cliente.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </section>
+
+          {/* AGREGAR PRODUCTO */}
+
+          <section className="rounded-xl border border-border bg-surface shadow-sm">
+            <div className="border-b border-border px-6 py-4">
+              <h2 className="text-lg font-semibold">Agregar producto</h2>
+
+              <p className="mt-1 text-sm text-muted-foreground">
+                Selecciona un producto y la cantidad.
+              </p>
+            </div>
+
+            <div className="grid gap-5 p-6 md:grid-cols-[1fr_140px_auto] md:items-end">
+              <div>
+                <label htmlFor="producto" className={labelClass}>
+                  Producto
+                </label>
+
+                <select
+                  id="producto"
+                  value={productoId}
+                  onChange={(event) => setProductoId(event.target.value)}
+                  className={inputClass}
+                >
+                  <option value="">Selecciona un producto</option>
+
+                  {productos.map((producto) => (
+                    <option
+                      key={producto.id}
+                      value={producto.id}
+                      disabled={producto.stock === 0}
+                    >
+                      {producto.nombre}
+                      {" - $"}
+                      {Number(producto.precio).toFixed(2)}
+                      {" - Stock: "}
+                      {producto.stock}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="cantidad" className={labelClass}>
+                  Cantidad
+                </label>
+
+                <input
+                  id="cantidad"
+                  type="number"
+                  min="1"
+                  value={cantidad}
+                  onChange={(event) => setCantidad(event.target.value)}
+                  className={inputClass}
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={agregarProducto}
+                className="rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition hover:opacity-90"
+              >
+                Agregar
+              </button>
+            </div>
+          </section>
+
+          {/* PRODUCTOS DE LA VENTA */}
+
+          <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
+            <div className="border-b border-border px-6 py-4">
+              <h2 className="text-lg font-semibold">Productos de la venta</h2>
+
+              <p className="mt-1 text-sm text-muted-foreground">
+                {detalles.length} productos distintos
+              </p>
+            </div>
+
+            {detalles.length === 0 ? (
+              <div className="p-8 text-center text-muted-foreground">
+                No hay productos agregados.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-muted">
+                    <tr>
+                      <th className="px-6 py-3 font-medium">Producto</th>
+
+                      <th className="px-6 py-3 font-medium">Precio</th>
+
+                      <th className="px-6 py-3 text-center font-medium">
+                        Cantidad
+                      </th>
+
+                      <th className="px-6 py-3 text-right font-medium">
+                        Total parcial
+                      </th>
+
+                      <th className="px-6 py-3 text-right font-medium">
+                        Acciones
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {detalles.map((detalle) => {
+                      const producto = productos.find(
+                        (item) =>
+                          Number(item.id) === Number(detalle.productoId),
+                      );
+
+                      if (!producto) {
+                        return null;
+                      }
+
+                      const subtotal = obtenerSubtotal(
+                        detalle.productoId,
+                        detalle.cantidad,
+                      );
+
+                      return (
+                        <tr
+                          key={detalle.productoId}
+                          className="border-t border-border"
+                        >
+                          <td className="px-6 py-4 font-medium">
+                            {producto.nombre}
+                          </td>
+
+                          <td className="px-6 py-4 text-muted-foreground">
+                            $
+                            {Number(producto.precio).toLocaleString("es-MX", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </td>
+
+                          <td className="px-6 py-4 text-center">
+                            {detalle.cantidad}
+                          </td>
+
+                          <td className="px-6 py-4 text-right font-semibold">
+                            $
+                            {subtotal.toLocaleString("es-MX", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </td>
+
+                          <td className="px-6 py-4 text-right">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                eliminarDetalle(detalle.productoId)
+                              }
+                              className="rounded-lg px-3 py-2 text-xs font-medium text-danger transition hover:bg-danger/10"
+                            >
+                              Eliminar
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        </div>
+
+        {/* RESUMEN */}
+
+        <aside className="h-fit rounded-xl border border-border bg-surface shadow-sm xl:sticky xl:top-24">
+          <div className="border-b border-border px-6 py-4">
+            <h2 className="text-lg font-semibold">Resumen de venta</h2>
+          </div>
+
+          <div className="space-y-5 p-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">
+                  Productos distintos
+                </span>
+
+                <span className="font-semibold">{detalles.length}</span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Unidades</span>
+
+                <span className="font-semibold">{totalUnidades}</span>
+              </div>
+            </div>
+
+            <div className="rounded-xl bg-muted p-5">
+              <p className="text-sm font-medium text-muted-foreground">
+                Total de la venta
+              </p>
+
+              <p className="mt-2 text-3xl font-bold text-foreground">
+                $
+                {Number(total).toLocaleString("es-MX", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              disabled={guardando || !clienteId || detalles.length === 0}
+              onClick={registrarVenta}
+              className="w-full rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {guardando ? "Registrando..." : "Registrar venta"}
+            </button>
+
+            {!clienteId && (
+              <p className="text-center text-xs text-muted-foreground">
+                Selecciona un cliente para continuar.
+              </p>
+            )}
+          </div>
+        </aside>
+      </div>
+    </div>
   );
 }

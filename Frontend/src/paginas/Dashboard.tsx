@@ -62,33 +62,58 @@ export function Dashboard() {
   }, []);
 
   if (cargando) {
-    return <p>Cargando panel...</p>;
+    return (
+      <div className="flex min-h-64 items-center justify-center">
+        <p className="text-muted-foreground">Cargando dashboard...</p>
+      </div>
+    );
   }
 
   if (error) {
-    return <p>{error}</p>;
+    return (
+      <div className="rounded-lg border border-danger/20 bg-danger/5 p-4">
+        <p className="font-medium text-danger">{error}</p>
+      </div>
+    );
   }
 
   if (!resumen) {
-    return <p>No hay información disponible.</p>;
+    return (
+      <p className="text-muted-foreground">No hay información disponible.</p>
+    );
   }
 
   return (
-    <section>
-      <h1>Dashboard</h1>
-
-      <p>Resumen general del sistema</p>
+    <div className="space-y-8">
+      {/* Encabezado */}
 
       <div>
-        <article>
-          <h3>Ventas hoy</h3>
-          <strong>{resumen.ventasHoy}</strong>
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+
+        <p className="mt-1 text-muted-foreground">
+          Resumen general del sistema
+        </p>
+      </div>
+
+      {/* Tarjetas */}
+
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <article className="rounded-xl border border-border bg-surface p-5 shadow-sm">
+          <p className="text-sm font-medium text-muted-foreground">
+            Ventas hoy
+          </p>
+
+          <strong className="mt-2 block text-3xl font-bold">
+            {resumen.ventasHoy}
+          </strong>
         </article>
 
-        <article>
-          <h3>Ingresos hoy</h3>
+        <article className="rounded-xl border border-border bg-surface p-5 shadow-sm">
+          <p className="text-sm font-medium text-muted-foreground">
+            Ingresos hoy
+          </p>
 
-          <strong>
+          <strong className="mt-2 block text-3xl font-bold">
             $
             {resumen.ingresosHoy.toLocaleString("es-MX", {
               minimumFractionDigits: 2,
@@ -97,30 +122,48 @@ export function Dashboard() {
           </strong>
         </article>
 
-        <article>
-          <h3>Productos</h3>
-          <strong>{resumen.totalProductos}</strong>
+        <article className="rounded-xl border border-border bg-surface p-5 shadow-sm">
+          <p className="text-sm font-medium text-muted-foreground">Productos</p>
+
+          <strong className="mt-2 block text-3xl font-bold">
+            {resumen.totalProductos}
+          </strong>
         </article>
 
-        <article>
-          <h3>Categorías</h3>
-          <strong>{resumen.totalCategorias}</strong>
+        <article className="rounded-xl border border-border bg-surface p-5 shadow-sm">
+          <p className="text-sm font-medium text-muted-foreground">
+            Categorías
+          </p>
+
+          <strong className="mt-2 block text-3xl font-bold">
+            {resumen.totalCategorias}
+          </strong>
         </article>
 
-        <article>
-          <h3>Clientes</h3>
-          <strong>{resumen.totalClientes}</strong>
+        <article className="rounded-xl border border-border bg-surface p-5 shadow-sm">
+          <p className="text-sm font-medium text-muted-foreground">Clientes</p>
+
+          <strong className="mt-2 block text-3xl font-bold">
+            {resumen.totalClientes}
+          </strong>
         </article>
 
-        <article>
-          <h3>Stock bajo</h3>
-          <strong>{resumen.productosStockBajo.length}</strong>
+        <article className="rounded-xl border border-border bg-surface p-5 shadow-sm">
+          <p className="text-sm font-medium text-muted-foreground">
+            Stock bajo
+          </p>
+
+          <strong className="mt-2 block text-3xl font-bold text-danger">
+            {resumen.productosStockBajo.length}
+          </strong>
         </article>
 
-        <article>
-          <h3>Valor del inventario</h3>
+        <article className="rounded-xl border border-border bg-surface p-5 shadow-sm sm:col-span-2">
+          <p className="text-sm font-medium text-muted-foreground">
+            Valor del inventario
+          </p>
 
-          <strong>
+          <strong className="mt-2 block text-3xl font-bold">
             $
             {resumen.valorInventario.toLocaleString("es-MX", {
               minimumFractionDigits: 2,
@@ -128,17 +171,22 @@ export function Dashboard() {
             })}
           </strong>
         </article>
-      </div>
+      </section>
 
-      <section>
-        <h2>Ingresos de los últimos 7 días</h2>
+      {/* Gráfica */}
 
-        <div
-          style={{
-            width: "100%",
-            height: 300,
-          }}
-        >
+      <section className="rounded-xl border border-border bg-surface p-6 shadow-sm">
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold">
+            Ingresos de los últimos 7 días
+          </h2>
+
+          <p className="text-sm text-muted-foreground">
+            Evolución diaria de ingresos
+          </p>
+        </div>
+
+        <div className="h-80 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={ventas7Dias}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -165,67 +213,112 @@ export function Dashboard() {
                 ]}
               />
 
-              <Line type="monotone" dataKey="ingresos" />
+              <Line
+                type="monotone"
+                dataKey="ingresos"
+                stroke="var(--color-primary)"
+                strokeWidth={3}
+                dot={{
+                  fill: "var(--color-primary)",
+                }}
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </section>
 
-      <section>
-        <h2>Top 5 productos más vendidos</h2>
+      {/* Tablas */}
 
-        {productosMasVendidos.length === 0 ? (
-          <p>No hay ventas suficientes todavía.</p>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Producto</th>
-                <th>SKU</th>
-                <th>Unidades vendidas</th>
-              </tr>
-            </thead>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
+          <div className="border-b border-border p-5">
+            <h2 className="font-semibold">Top 5 productos más vendidos</h2>
+          </div>
 
-            <tbody>
-              {productosMasVendidos.map((producto) => (
-                <tr key={producto.productoId}>
-                  <td>{producto.nombre}</td>
-                  <td>{producto.sku}</td>
-                  <td>{producto.cantidadVendida}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
+          {productosMasVendidos.length === 0 ? (
+            <p className="p-5 text-sm text-muted-foreground">
+              No hay ventas suficientes todavía.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-muted">
+                  <tr>
+                    <th className="px-5 py-3 font-medium">Producto</th>
+                    <th className="px-5 py-3 font-medium">SKU</th>
+                    <th className="px-5 py-3 text-right font-medium">
+                      Vendidos
+                    </th>
+                  </tr>
+                </thead>
 
-      <section>
-        <h2>Productos con stock bajo</h2>
+                <tbody>
+                  {productosMasVendidos.map((producto) => (
+                    <tr
+                      key={producto.productoId}
+                      className="border-t border-border"
+                    >
+                      <td className="px-5 py-4 font-medium">
+                        {producto.nombre}
+                      </td>
 
-        {resumen.productosStockBajo.length === 0 ? (
-          <p>No hay productos con stock bajo.</p>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Producto</th>
-                <th>SKU</th>
-                <th>Stock</th>
-              </tr>
-            </thead>
+                      <td className="px-5 py-4 text-muted-foreground">
+                        {producto.sku}
+                      </td>
 
-            <tbody>
-              {resumen.productosStockBajo.map((producto) => (
-                <tr key={producto.id}>
-                  <td>{producto.nombre}</td>
-                  <td>{producto.sku}</td>
-                  <td>{producto.stock}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
-    </section>
+                      <td className="px-5 py-4 text-right font-semibold">
+                        {producto.cantidadVendida}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
+          <div className="border-b border-border p-5">
+            <h2 className="font-semibold">Productos con stock bajo</h2>
+          </div>
+
+          {resumen.productosStockBajo.length === 0 ? (
+            <p className="p-5 text-sm text-muted-foreground">
+              No hay productos con stock bajo.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-muted">
+                  <tr>
+                    <th className="px-5 py-3 font-medium">Producto</th>
+                    <th className="px-5 py-3 font-medium">SKU</th>
+                    <th className="px-5 py-3 text-right font-medium">Stock</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {resumen.productosStockBajo.map((producto) => (
+                    <tr key={producto.id} className="border-t border-border">
+                      <td className="px-5 py-4 font-medium">
+                        {producto.nombre}
+                      </td>
+
+                      <td className="px-5 py-4 text-muted-foreground">
+                        {producto.sku}
+                      </td>
+
+                      <td className="px-5 py-4 text-right font-bold text-danger">
+                        {producto.stock}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      </div>
+    </div>
   );
 }

@@ -1,9 +1,6 @@
 import type { Producto } from "../tipos/Productos";
 import { apiFetch } from "./api";
 
-
-const API_URL = "http://localhost:3001/api/productos";
-
 interface DatosProducto {
   nombre: string;
   sku: string;
@@ -21,7 +18,7 @@ function obtenerHeaders() {
 }
 
 export async function obtenerProductos(): Promise<Producto[]> {
-  const respuesta = await fetch(API_URL, {
+  const respuesta = await apiFetch("/productos", {
     headers: obtenerHeaders(),
   });
 

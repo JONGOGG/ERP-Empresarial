@@ -8,6 +8,7 @@ import { Clientes } from "./paginas/Clientes";
 import { Ventas } from "./paginas/Ventas";
 import { HistorialVentas } from "./paginas/HistorialVentas";
 import { DetalleVenta } from "./paginas/DetalleVenta";
+import { Proveedores } from "./paginas/Proveedores";
 
 import { LayoutPrincipal } from "./layouts/LayoutPrincipal";
 import { RutaProtegida } from "./rutas/RutaProtegida";
@@ -35,6 +36,8 @@ function App() {
             <Route path="/ventas/historial" element={<HistorialVentas />} />
 
             <Route path="/ventas/:id" element={<DetalleVenta />} />
+
+            <Route path="/proveedores" element={<Proveedores />} />
           </Route>
         </Route>
       </Routes>

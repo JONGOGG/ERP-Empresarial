@@ -12,7 +12,7 @@ const router = Router();
 
 router.get("/", listarCategorias);
 router.post("/", permitirRoles("ADMIN", "EMPLEADO") , registrarCategoria);
-router.put("/:id", permitirRoles("ADMI", "EMPLEADO"), editarCategoria);
+router.put("/:id", permitirRoles("ADMIN", "EMPLEADO"), editarCategoria);
 router.delete("/:id", permitirRoles("ADMIN"), borrarCategoria);
 
 export default router;

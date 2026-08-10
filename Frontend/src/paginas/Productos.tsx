@@ -9,9 +9,7 @@ import {
   eliminarProducto,
 } from "../servicios/productosServicio";
 
-import {
-  obtenerCategorias,
-} from "../servicios/categoriasServicio";
+import { obtenerCategorias } from "../servicios/categoriasServicio";
 
 export function Productos() {
   const [productos, setProductos] = useState<Producto[]>([]);
@@ -23,8 +21,9 @@ export function Productos() {
   const [stock, setStock] = useState("");
   const [categoriaId, setCategoriaId] = useState("");
 
-  const [productoEditando, setProductoEditando] =
-    useState<Producto | null>(null);
+  const [productoEditando, setProductoEditando] = useState<Producto | null>(
+    null,
+  );
 
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
@@ -34,20 +33,17 @@ export function Productos() {
       try {
         setError("");
 
-        const [productosDB, categoriasDB] =
-          await Promise.all([
-            obtenerProductos(),
-            obtenerCategorias(),
-          ]);
+        const [productosDB, categoriasDB] = await Promise.all([
+          obtenerProductos(),
+          obtenerCategorias(),
+        ]);
 
         setProductos(productosDB);
         setCategorias(categoriasDB);
       } catch (error) {
         console.error(error);
 
-        setError(
-          "No se pudieron cargar los productos"
-        );
+        setError("No se pudieron cargar los productos");
       } finally {
         setCargando(false);
       }
@@ -65,22 +61,11 @@ export function Productos() {
     setProductoEditando(null);
   };
 
-  const guardarProducto = async (
-    event: React.FormEvent<HTMLFormElement>
-  ) => {
+  const guardarProducto = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (
-      !nombre.trim() ||
-      !sku.trim() ||
-      !precio ||
-      !stock ||
-      !categoriaId
-    ) {
-      setError(
-        "Todos los campos son obligatorios"
-      );
-
+    if (!nombre.trim() || !sku.trim() || !precio || !stock || !categoriaId) {
+      setError("Todos los campos son obligatorios");
       return;
     }
 
@@ -89,18 +74,12 @@ export function Productos() {
     const categoriaNumero = Number(categoriaId);
 
     if (precioNumero < 0) {
-      setError(
-        "El precio no puede ser negativo"
-      );
-
+      setError("El precio no puede ser negativo");
       return;
     }
 
     if (stockNumero < 0) {
-      setError(
-        "El stock no puede ser negativo"
-      );
-
+      setError("El stock no puede ser negativo");
       return;
     }
 
@@ -116,343 +95,333 @@ export function Productos() {
       setError("");
 
       if (productoEditando) {
-        const productoActualizado =
-          await actualizarProducto(
-            productoEditando.id,
-            datosProducto
-          );
+        const productoActualizado = await actualizarProducto(
+          productoEditando.id,
+          datosProducto,
+        );
 
         setProductos((productosActuales) =>
-          productosActuales.map(
-            (producto) =>
-              producto.id ===
-              productoActualizado.id
-                ? productoActualizado
-                : producto
-          )
+          productosActuales.map((producto) =>
+            producto.id === productoActualizado.id
+              ? productoActualizado
+              : producto,
+          ),
         );
       } else {
-        const nuevoProducto =
-          await crearProducto(
-            datosProducto
-          );
+        const nuevoProducto = await crearProducto(datosProducto);
 
-        setProductos(
-          (productosActuales) => [
-            ...productosActuales,
-            nuevoProducto,
-          ]
-        );
+        setProductos((productosActuales) => [
+          ...productosActuales,
+          nuevoProducto,
+        ]);
       }
 
       limpiarFormulario();
     } catch (error) {
       console.error(error);
-
-      setError(
-        "No se pudo guardar el producto"
-      );
+      setError("No se pudo guardar el producto");
     }
   };
 
-  const seleccionarProducto = (
-    producto: Producto
-  ) => {
+  const seleccionarProducto = (producto: Producto) => {
     setProductoEditando(producto);
 
     setNombre(producto.nombre);
     setSku(producto.sku);
-    setPrecio(
-      String(producto.precio)
-    );
-    setStock(
-      String(producto.stock)
-    );
-    setCategoriaId(
-      String(producto.categoriaId)
-    );
+    setPrecio(String(producto.precio));
+    setStock(String(producto.stock));
+    setCategoriaId(String(producto.categoriaId));
 
     setError("");
   };
 
-  const manejarEliminarProducto =
-    async (id: number) => {
-      try {
-        setError("");
+  const manejarEliminarProducto = async (id: number) => {
+    try {
+      setError("");
 
-        await eliminarProducto(id);
+      await eliminarProducto(id);
 
-        setProductos(
-          (productosActuales) =>
-            productosActuales.filter(
-              (producto) =>
-                producto.id !== id
-            )
-        );
+      setProductos((productosActuales) =>
+        productosActuales.filter((producto) => producto.id !== id),
+      );
 
-        if (
-          productoEditando?.id === id
-        ) {
-          limpiarFormulario();
-        }
-      } catch (error) {
-        console.error(error);
-
-        setError(
-          "No se pudo eliminar el producto"
-        );
+      if (productoEditando?.id === id) {
+        limpiarFormulario();
       }
-    };
+    } catch (error) {
+      console.error(error);
+      setError("No se pudo eliminar el producto");
+    }
+  };
+
+  const inputClass =
+    "w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20";
+
+  const labelClass = "mb-1.5 block text-sm font-medium text-foreground";
 
   return (
-    <section>
-      <h1>Productos</h1>
+    <div className="space-y-6">
+      {/* Encabezado */}
 
-      <p>
-        Administra el inventario de
-        productos.
-      </p>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Productos</h1>
+
+        <p className="mt-1 text-muted-foreground">
+          Administra el inventario de productos.
+        </p>
+      </div>
+
+      {/* Aviso */}
 
       {categorias.length === 0 && (
-        <p>
-          Primero debes crear al menos
-          una categoría.
-        </p>
+        <div className="rounded-lg border border-accent/30 bg-accent/10 p-4">
+          <p className="text-sm font-medium">
+            Primero debes crear al menos una categoría.
+          </p>
+        </div>
       )}
 
-      <form onSubmit={guardarProducto}>
-        <div>
-          <label htmlFor="nombre">
-            Nombre
-          </label>
-
-          <input
-            id="nombre"
-            type="text"
-            value={nombre}
-            onChange={(event) =>
-              setNombre(
-                event.target.value
-              )
-            }
-            placeholder="Ej. Laptop Lenovo"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="sku">
-            SKU
-          </label>
-
-          <input
-            id="sku"
-            type="text"
-            value={sku}
-            onChange={(event) =>
-              setSku(
-                event.target.value
-              )
-            }
-            placeholder="PROD-001"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="precio">
-            Precio
-          </label>
-
-          <input
-            id="precio"
-            type="number"
-            min="0"
-            step="0.01"
-            value={precio}
-            onChange={(event) =>
-              setPrecio(
-                event.target.value
-              )
-            }
-            placeholder="0.00"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="stock">
-            Stock
-          </label>
-
-          <input
-            id="stock"
-            type="number"
-            min="0"
-            step="1"
-            value={stock}
-            onChange={(event) =>
-              setStock(
-                event.target.value
-              )
-            }
-            placeholder="0"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="categoria">
-            Categoría
-          </label>
-
-          <select
-            id="categoria"
-            value={categoriaId}
-            onChange={(event) =>
-              setCategoriaId(
-                event.target.value
-              )
-            }
-          >
-            <option value="">
-              Selecciona una categoría
-            </option>
-
-            {categorias.map(
-              (categoria) => (
-                <option
-                  key={
-                    categoria.id
-                  }
-                  value={
-                    categoria.id
-                  }
-                >
-                  {
-                    categoria.nombre
-                  }
-                </option>
-              )
-            )}
-          </select>
-        </div>
-
-        <button
-          type="submit"
-          disabled={
-            categorias.length === 0
-          }
-        >
-          {productoEditando
-            ? "Guardar cambios"
-            : "Agregar producto"}
-        </button>
-
-        {productoEditando && (
-          <button
-            type="button"
-            onClick={
-              limpiarFormulario
-            }
-          >
-            Cancelar
-          </button>
-        )}
-      </form>
+      {/* Error */}
 
       {error && (
-        <p>{error}</p>
+        <div className="rounded-lg border border-danger/20 bg-danger/5 p-4">
+          <p className="text-sm font-medium text-danger">{error}</p>
+        </div>
       )}
 
-      <hr />
+      {/* Formulario */}
 
-      {cargando ? (
-        <p>
-          Cargando productos...
-        </p>
-      ) : productos.length === 0 ? (
-        <p>
-          No hay productos registrados.
-        </p>
-      ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>SKU</th>
-              <th>Precio</th>
-              <th>Stock</th>
-              <th>Categoría</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
+      <section className="rounded-xl border border-border bg-surface shadow-sm">
+        <div className="border-b border-border px-6 py-4">
+          <h2 className="text-lg font-semibold">
+            {productoEditando ? "Editar producto" : "Nuevo producto"}
+          </h2>
 
-          <tbody>
-            {productos.map(
-              (producto) => (
-                <tr
-                  key={
-                    producto.id
-                  }
-                >
-                  <td>
-                    {
-                      producto.nombre
-                    }
-                  </td>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {productoEditando
+              ? "Modifica la información del producto seleccionado."
+              : "Registra un nuevo producto en el inventario."}
+          </p>
+        </div>
 
-                  <td>
-                    {
-                      producto.sku
-                    }
-                  </td>
+        <form onSubmit={guardarProducto} className="p-6">
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-5">
+            <div>
+              <label htmlFor="nombre" className={labelClass}>
+                Nombre
+              </label>
 
-                  <td>
-                    $
-                    {Number(
-                      producto.precio
-                    ).toFixed(2)}
-                  </td>
+              <input
+                id="nombre"
+                type="text"
+                value={nombre}
+                onChange={(event) => setNombre(event.target.value)}
+                placeholder="Ej. Laptop Lenovo"
+                className={inputClass}
+              />
+            </div>
 
-                  <td>
-                    {
-                      producto.stock
-                    }
-                  </td>
+            <div>
+              <label htmlFor="sku" className={labelClass}>
+                SKU
+              </label>
 
-                  <td>
-                    {producto
-                      .categoria
-                      ?.nombre ??
-                      "Sin categoría"}
-                  </td>
+              <input
+                id="sku"
+                type="text"
+                value={sku}
+                onChange={(event) => setSku(event.target.value)}
+                placeholder="PROD-001"
+                className={inputClass}
+              />
+            </div>
 
-                  <td>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        seleccionarProducto(
-                          producto
-                        )
-                      }
-                    >
-                      Editar
-                    </button>
+            <div>
+              <label htmlFor="precio" className={labelClass}>
+                Precio
+              </label>
 
-                    <button
-                      type="button"
-                      onClick={() =>
-                        manejarEliminarProducto(
-                          producto.id
-                        )
-                      }
-                    >
-                      Eliminar
-                    </button>
-                  </td>
-                </tr>
-              )
+              <input
+                id="precio"
+                type="number"
+                min="0"
+                step="0.01"
+                value={precio}
+                onChange={(event) => setPrecio(event.target.value)}
+                placeholder="0.00"
+                className={inputClass}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="stock" className={labelClass}>
+                Stock
+              </label>
+
+              <input
+                id="stock"
+                type="number"
+                min="0"
+                step="1"
+                value={stock}
+                onChange={(event) => setStock(event.target.value)}
+                placeholder="0"
+                className={inputClass}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="categoria" className={labelClass}>
+                Categoría
+              </label>
+
+              <select
+                id="categoria"
+                value={categoriaId}
+                onChange={(event) => setCategoriaId(event.target.value)}
+                className={inputClass}
+              >
+                <option value="">Selecciona una categoría</option>
+
+                {categorias.map((categoria) => (
+                  <option key={categoria.id} value={categoria.id}>
+                    {categoria.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="mt-6 flex items-center gap-3">
+            <button
+              type="submit"
+              disabled={categorias.length === 0}
+              className="rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {productoEditando ? "Guardar cambios" : "Agregar producto"}
+            </button>
+
+            {productoEditando && (
+              <button
+                type="button"
+                onClick={limpiarFormulario}
+                className="rounded-lg border border-border bg-surface px-5 py-2.5 text-sm font-medium transition hover:bg-muted"
+              >
+                Cancelar
+              </button>
             )}
-          </tbody>
-        </table>
-      )}
-    </section>
+          </div>
+        </form>
+      </section>
+
+      {/* Tabla */}
+
+      <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
+        <div className="flex items-center justify-between border-b border-border px-6 py-4">
+          <div>
+            <h2 className="text-lg font-semibold">Inventario</h2>
+
+            <p className="text-sm text-muted-foreground">
+              {productos.length} productos registrados
+            </p>
+          </div>
+        </div>
+
+        {cargando ? (
+          <div className="p-8 text-center text-muted-foreground">
+            Cargando productos...
+          </div>
+        ) : productos.length === 0 ? (
+          <div className="p-8 text-center text-muted-foreground">
+            No hay productos registrados.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-muted">
+                <tr>
+                  <th className="px-6 py-3 font-medium">Nombre</th>
+
+                  <th className="px-6 py-3 font-medium">SKU</th>
+
+                  <th className="px-6 py-3 font-medium">Precio</th>
+
+                  <th className="px-6 py-3 font-medium">Stock</th>
+
+                  <th className="px-6 py-3 font-medium">Categoría</th>
+
+                  <th className="px-6 py-3 text-right font-medium">Acciones</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {productos.map((producto) => (
+                  <tr
+                    key={producto.id}
+                    className="border-t border-border transition hover:bg-muted/50"
+                  >
+                    <td className="px-6 py-4 font-medium">{producto.nombre}</td>
+
+                    <td className="px-6 py-4 text-muted-foreground">
+                      {producto.sku}
+                    </td>
+
+                    <td className="px-6 py-4">
+                      $
+                      {Number(producto.precio).toLocaleString("es-MX", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </td>
+
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+                          producto.stock === 0
+                            ? "bg-danger/10 text-danger"
+                            : producto.stock <= 5
+                              ? "bg-accent/20 text-accent-foreground"
+                              : "bg-success/10 text-success"
+                        }`}
+                      >
+                        {producto.stock === 0
+                          ? "Sin stock"
+                          : producto.stock <= 5
+                            ? `${producto.stock} - Bajo`
+                            : producto.stock}
+                      </span>
+                    </td>
+
+                    <td className="px-6 py-4">
+                      {producto.categoria?.nombre ?? "Sin categoría"}
+                    </td>
+
+                    <td className="px-6 py-4">
+                      <div className="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => seleccionarProducto(producto)}
+                          className="rounded-lg border border-border px-3 py-2 text-xs font-medium transition hover:bg-muted"
+                        >
+                          Editar
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => manejarEliminarProducto(producto.id)}
+                          className="rounded-lg px-3 py-2 text-xs font-medium text-danger transition hover:bg-danger/10"
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+    </div>
   );
 }
