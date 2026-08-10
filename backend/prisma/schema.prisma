@@ -29,7 +29,8 @@ model Producto {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  detallesVenta DetalleVenta[]
+  detallesVenta  DetalleVenta[]
+  detallesCompra DetalleCompra[]
 }
 
 model Cliente {
@@ -58,7 +59,8 @@ model Usuario {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  ventas Venta[]
+  ventas  Venta[]
+  compras Compra[]
 }
 
 model Venta {
@@ -95,4 +97,32 @@ model Proveedor {
   direccion String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  compras Compra[]
+}
+
+model Compra {
+  id        Int      @id @default(autoincrement())
+  total     Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+
+  proveedorId Int
+  proveedor   Proveedor @relation(fields: [proveedorId], references: [id])
+
+  usuarioId Int
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+
+  detalles DetalleCompra[]
+}
+
+model DetalleCompra {
+  id            Int     @id @default(autoincrement())
+  cantidad      Int
+  costoUnitario Decimal @db.Decimal(10, 2)
+
+  compraId Int
+  compra   Compra @relation(fields: [compraId], references: [id])
+
+  productoId Int
+  producto   Producto @relation(fields: [productoId], references: [id])
 }
