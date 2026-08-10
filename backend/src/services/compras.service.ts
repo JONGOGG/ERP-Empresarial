@@ -58,14 +58,37 @@ export async function crearCompra(datos: DatosCompra) {
     });
 
     for (const item of datos.productos) {
+      const producto = await tx.producto.findUnique({
+        where: {
+          id: item.productoId,
+        },
+      });
+
+      if (!producto) {
+        throw new Error("Producto no encontrado");
+      }
+
+      const stockAntes = producto.stock;
+      const stockDespues = stockAntes + item.cantidad;
+
       await tx.producto.update({
         where: {
           id: item.productoId,
         },
         data: {
-          stock: {
-            increment: item.cantidad,
-          },
+          stock: stockDespues,
+        },
+      });
+
+      await tx.movimientoInventario.create({
+        data: {
+          tipo: "COMPRA",
+          cantidad: item.cantidad,
+          stockAntes,
+          stockDespues,
+          referencia: `Compra #${compra.id}`,
+          productoId: item.productoId,
+          usuarioId: datos.usuarioId,
         },
       });
     }

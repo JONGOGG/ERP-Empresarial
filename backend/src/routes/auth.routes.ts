@@ -57,6 +57,7 @@ router.post("/registro", async (req, res) => {
         nombre: usuario.nombre,
         correo: usuario.correo,
         rol: usuario.rol,
+        activo: usuario.activo,
       },
     });
   } catch (error) {
@@ -94,7 +95,13 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // Comparar contraseña
+    // VALIDAR SI EL USUARIO ESTÁ ACTIVO
+    if (!usuario.activo) {
+      return res.status(403).json({
+        mensaje: "Tu cuenta está desactivada",
+      });
+    }
+
     const passwordCorrecto = await bcrypt.compare(
       password,
       usuario.password
@@ -109,10 +116,11 @@ router.post("/login", async (req, res) => {
     const secret = process.env.JWT_SECRET;
 
     if (!secret) {
-      throw new Error("JWT_SECRET no está configurado");
+      throw new Error(
+        "JWT_SECRET no está configurado"
+      );
     }
 
-    // Crear token
     const token = jwt.sign(
       {
         id: usuario.id,
@@ -135,6 +143,7 @@ router.post("/login", async (req, res) => {
         nombre: usuario.nombre,
         correo: usuario.correo,
         rol: usuario.rol,
+        activo: usuario.activo,
       },
     });
   } catch (error) {

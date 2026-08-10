@@ -87,17 +87,46 @@ export async function crearVenta(datos: DatosVenta) {
 
     // Descontar existencias
     for (const item of datos.productos) {
-      await tx.producto.update({
-        where: {
-          id: item.productoId,
-        },
-        data: {
-          stock: {
-            decrement: item.cantidad,
-          },
-        },
-      });
-    }
+  const producto = await tx.producto.findUnique({
+    where: {
+      id: item.productoId,
+    },
+  });
+
+  if (!producto) {
+    throw new Error("Producto no encontrado");
+  }
+
+  const stockAntes = producto.stock;
+  const stockDespues = stockAntes - item.cantidad;
+
+  if (stockDespues < 0) {
+    throw new Error(
+      `Stock insuficiente para ${producto.nombre}`
+    );
+  }
+
+  await tx.producto.update({
+    where: {
+      id: item.productoId,
+    },
+    data: {
+      stock: stockDespues,
+    },
+  });
+
+  await tx.movimientoInventario.create({
+    data: {
+      tipo: "VENTA",
+      cantidad: -item.cantidad,
+      stockAntes,
+      stockDespues,
+      referencia: `Venta #${venta.id}`,
+      productoId: item.productoId,
+      usuarioId: datos.usuarioId,
+    },
+  });
+}
 
     return venta;
   });

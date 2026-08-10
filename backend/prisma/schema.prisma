@@ -31,6 +31,7 @@ model Producto {
 
   detallesVenta  DetalleVenta[]
   detallesCompra DetalleCompra[]
+  movimientos    MovimientoInventario[]
 }
 
 model Cliente {
@@ -51,16 +52,19 @@ enum Rol {
 }
 
 model Usuario {
-  id        Int      @id @default(autoincrement())
-  nombre    String
-  correo    String   @unique
-  password  String
-  rol       Rol      @default(EMPLEADO)
+  id       Int     @id @default(autoincrement())
+  nombre   String
+  correo   String  @unique
+  password String
+  rol      Rol     @default(EMPLEADO)
+  activo   Boolean @default(true)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  ventas  Venta[]
-  compras Compra[]
+  ventas      Venta[]
+  compras     Compra[]
+  movimientos MovimientoInventario[]
 }
 
 model Venta {
@@ -125,4 +129,26 @@ model DetalleCompra {
 
   productoId Int
   producto   Producto @relation(fields: [productoId], references: [id])
+}
+
+enum TipoMovimiento {
+  COMPRA
+  VENTA
+  AJUSTE
+}
+
+model MovimientoInventario {
+  id           Int            @id @default(autoincrement())
+  tipo         TipoMovimiento
+  cantidad     Int
+  stockAntes   Int
+  stockDespues Int
+  referencia   String?
+  createdAt    DateTime       @default(now())
+
+  productoId Int
+  producto   Producto @relation(fields: [productoId], references: [id])
+
+  usuarioId Int
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
 }
