@@ -9,6 +9,10 @@ import {
 } from "../servicios/categoriasServicio";
 
 export function Categorias() {
+  const usuarioGuardado = localStorage.getItem("usuario");
+  const usuario = usuarioGuardado ? JSON.parse(usuarioGuardado) : null;
+  const esAdmin = usuario?.rol === "ADMIN";
+
   const [categorias, setCategorias] = useState<Categoria[]>([]);
 
   const [nombre, setNombre] = useState("");
@@ -143,74 +147,74 @@ export function Categorias() {
           <p className="text-sm font-medium text-danger">{error}</p>
         </div>
       )}
+      {esAdmin && (
+        <section className="rounded-xl border border-border bg-surface shadow-sm">
+          <div className="border-b border-border px-6 py-4">
+            <h2 className="text-lg font-semibold">
+              {categoriaEditando ? "Editar categoría" : "Nueva categoría"}
+            </h2>
 
-      <section className="rounded-xl border border-border bg-surface shadow-sm">
-        <div className="border-b border-border px-6 py-4">
-          <h2 className="text-lg font-semibold">
-            {categoriaEditando ? "Editar categoría" : "Nueva categoría"}
-          </h2>
-
-          <p className="mt-1 text-sm text-muted-foreground">
-            {categoriaEditando
-              ? "Modifica los datos de la categoría seleccionada."
-              : "Registra una nueva categoría para tus productos."}
-          </p>
-        </div>
-
-        <form onSubmit={guardarCategoria} className="p-6">
-          <div className="grid gap-5 md:grid-cols-2">
-            <div>
-              <label htmlFor="nombre" className={labelClass}>
-                Nombre
-              </label>
-
-              <input
-                id="nombre"
-                type="text"
-                value={nombre}
-                onChange={(event) => setNombre(event.target.value)}
-                placeholder="Ej. Electrónica"
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="descripcion" className={labelClass}>
-                Descripción
-              </label>
-
-              <input
-                id="descripcion"
-                type="text"
-                value={descripcion}
-                onChange={(event) => setDescripcion(event.target.value)}
-                placeholder="Descripción de la categoría"
-                className={inputClass}
-              />
-            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {categoriaEditando
+                ? "Modifica los datos de la categoría seleccionada."
+                : "Registra una nueva categoría para tus productos."}
+            </p>
           </div>
 
-          <div className="mt-6 flex items-center gap-3">
-            <button
-              type="submit"
-              className="rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition hover:opacity-90"
-            >
-              {categoriaEditando ? "Guardar cambios" : "Agregar categoría"}
-            </button>
+          <form onSubmit={guardarCategoria} className="p-6">
+            <div className="grid gap-5 md:grid-cols-2">
+              <div>
+                <label htmlFor="nombre" className={labelClass}>
+                  Nombre
+                </label>
 
-            {categoriaEditando && (
+                <input
+                  id="nombre"
+                  type="text"
+                  value={nombre}
+                  onChange={(event) => setNombre(event.target.value)}
+                  placeholder="Ej. Electrónica"
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="descripcion" className={labelClass}>
+                  Descripción
+                </label>
+
+                <input
+                  id="descripcion"
+                  type="text"
+                  value={descripcion}
+                  onChange={(event) => setDescripcion(event.target.value)}
+                  placeholder="Descripción de la categoría"
+                  className={inputClass}
+                />
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center gap-3">
               <button
-                type="button"
-                onClick={limpiarFormulario}
-                className="rounded-lg border border-border bg-surface px-5 py-2.5 text-sm font-medium transition hover:bg-muted"
+                type="submit"
+                className="rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition hover:opacity-90"
               >
-                Cancelar
+                {categoriaEditando ? "Guardar cambios" : "Agregar categoría"}
               </button>
-            )}
-          </div>
-        </form>
-      </section>
 
+              {categoriaEditando && (
+                <button
+                  type="button"
+                  onClick={limpiarFormulario}
+                  className="rounded-lg border border-border bg-surface px-5 py-2.5 text-sm font-medium transition hover:bg-muted"
+                >
+                  Cancelar
+                </button>
+              )}
+            </div>
+          </form>
+        </section>
+      )}
       <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <div>
@@ -256,26 +260,29 @@ export function Categorias() {
                     <td className="px-6 py-4 text-muted-foreground">
                       {categoria.descripcion || "Sin descripción"}
                     </td>
+                    {esAdmin && (
+                      <td className="px-6 py-4">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => seleccionarCategoria(categoria)}
+                            className="rounded-lg border border-border px-3 py-2 text-xs font-medium transition hover:bg-muted"
+                          >
+                            Editar
+                          </button>
 
-                    <td className="px-6 py-4">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => seleccionarCategoria(categoria)}
-                          className="rounded-lg border border-border px-3 py-2 text-xs font-medium transition hover:bg-muted"
-                        >
-                          Editar
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => manejarEliminarCategoria(categoria.id)}
-                          className="rounded-lg px-3 py-2 text-xs font-medium text-danger transition hover:bg-danger/10"
-                        >
-                          Eliminar
-                        </button>
-                      </div>
-                    </td>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              manejarEliminarCategoria(categoria.id)
+                            }
+                            className="rounded-lg px-3 py-2 text-xs font-medium text-danger transition hover:bg-danger/10"
+                          >
+                            Eliminar
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

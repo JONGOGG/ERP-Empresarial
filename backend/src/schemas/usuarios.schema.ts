@@ -27,3 +27,7 @@ export const actualizarUsuarioSchema = z.object({
 
   activo: z.boolean(),
 });
+
+export const cambiarPasswordUsuarioSchema = z.object({
+  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
+});

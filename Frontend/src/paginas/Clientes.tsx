@@ -9,6 +9,10 @@ import {
 } from "../servicios/clientesServicios";
 
 export function Clientes() {
+  const usuarioGuardado = localStorage.getItem("usuario");
+  const usuario = usuarioGuardado ? JSON.parse(usuarioGuardado) : null;
+  const esAdmin = usuario?.rol === "ADMIN";
+
   const [clientes, setClientes] = useState<Cliente[]>([]);
 
   const [nombre, setNombre] = useState("");
@@ -16,8 +20,7 @@ export function Clientes() {
   const [telefono, setTelefono] = useState("");
   const [ciudad, setCiudad] = useState("");
 
-  const [clienteEditando, setClienteEditando] =
-    useState<Cliente | null>(null);
+  const [clienteEditando, setClienteEditando] = useState<Cliente | null>(null);
 
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
@@ -50,9 +53,7 @@ export function Clientes() {
     setClienteEditando(null);
   };
 
-  const guardarCliente = async (
-    event: React.FormEvent<HTMLFormElement>
-  ) => {
+  const guardarCliente = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (
@@ -76,25 +77,17 @@ export function Clientes() {
       setError("");
 
       if (clienteEditando) {
-        const actualizado = await actualizarCliente(
-          clienteEditando.id,
-          datos
-        );
+        const actualizado = await actualizarCliente(clienteEditando.id, datos);
 
         setClientes((clientesActuales) =>
           clientesActuales.map((cliente) =>
-            cliente.id === actualizado.id
-              ? actualizado
-              : cliente
-          )
+            cliente.id === actualizado.id ? actualizado : cliente,
+          ),
         );
       } else {
         const nuevo = await crearCliente(datos);
 
-        setClientes((clientesActuales) => [
-          ...clientesActuales,
-          nuevo,
-        ]);
+        setClientes((clientesActuales) => [...clientesActuales, nuevo]);
       }
 
       limpiarFormulario();
@@ -126,9 +119,7 @@ export function Clientes() {
       await eliminarCliente(id);
 
       setClientes((clientesActuales) =>
-        clientesActuales.filter(
-          (cliente) => cliente.id !== id
-        )
+        clientesActuales.filter((cliente) => cliente.id !== id),
       );
 
       if (clienteEditando?.id === id) {
@@ -144,17 +135,14 @@ export function Clientes() {
   const inputClass =
     "w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20";
 
-  const labelClass =
-    "mb-1.5 block text-sm font-medium text-foreground";
+  const labelClass = "mb-1.5 block text-sm font-medium text-foreground";
 
   return (
     <div className="space-y-6">
       {/* Encabezado */}
 
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          Clientes
-        </h1>
+        <h1 className="text-3xl font-bold tracking-tight">Clientes</h1>
 
         <p className="mt-1 text-muted-foreground">
           Administra los clientes del ERP.
@@ -165,9 +153,7 @@ export function Clientes() {
 
       {error && (
         <div className="rounded-lg border border-danger/20 bg-danger/5 p-4">
-          <p className="text-sm font-medium text-danger">
-            {error}
-          </p>
+          <p className="text-sm font-medium text-danger">{error}</p>
         </div>
       )}
 
@@ -176,9 +162,7 @@ export function Clientes() {
       <section className="rounded-xl border border-border bg-surface shadow-sm">
         <div className="border-b border-border px-6 py-4">
           <h2 className="text-lg font-semibold">
-            {clienteEditando
-              ? "Editar cliente"
-              : "Nuevo cliente"}
+            {clienteEditando ? "Editar cliente" : "Nuevo cliente"}
           </h2>
 
           <p className="mt-1 text-sm text-muted-foreground">
@@ -188,16 +172,10 @@ export function Clientes() {
           </p>
         </div>
 
-        <form
-          onSubmit={guardarCliente}
-          className="p-6"
-        >
+        <form onSubmit={guardarCliente} className="p-6">
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
             <div>
-              <label
-                htmlFor="nombre"
-                className={labelClass}
-              >
+              <label htmlFor="nombre" className={labelClass}>
                 Nombre
               </label>
 
@@ -205,19 +183,14 @@ export function Clientes() {
                 id="nombre"
                 type="text"
                 value={nombre}
-                onChange={(event) =>
-                  setNombre(event.target.value)
-                }
+                onChange={(event) => setNombre(event.target.value)}
                 placeholder="Ej. Juan Pérez"
                 className={inputClass}
               />
             </div>
 
             <div>
-              <label
-                htmlFor="correo"
-                className={labelClass}
-              >
+              <label htmlFor="correo" className={labelClass}>
                 Correo
               </label>
 
@@ -225,19 +198,14 @@ export function Clientes() {
                 id="correo"
                 type="email"
                 value={correo}
-                onChange={(event) =>
-                  setCorreo(event.target.value)
-                }
+                onChange={(event) => setCorreo(event.target.value)}
                 placeholder="juan@correo.com"
                 className={inputClass}
               />
             </div>
 
             <div>
-              <label
-                htmlFor="telefono"
-                className={labelClass}
-              >
+              <label htmlFor="telefono" className={labelClass}>
                 Teléfono
               </label>
 
@@ -245,19 +213,14 @@ export function Clientes() {
                 id="telefono"
                 type="text"
                 value={telefono}
-                onChange={(event) =>
-                  setTelefono(event.target.value)
-                }
+                onChange={(event) => setTelefono(event.target.value)}
                 placeholder="4921234567"
                 className={inputClass}
               />
             </div>
 
             <div>
-              <label
-                htmlFor="ciudad"
-                className={labelClass}
-              >
+              <label htmlFor="ciudad" className={labelClass}>
                 Ciudad
               </label>
 
@@ -265,9 +228,7 @@ export function Clientes() {
                 id="ciudad"
                 type="text"
                 value={ciudad}
-                onChange={(event) =>
-                  setCiudad(event.target.value)
-                }
+                onChange={(event) => setCiudad(event.target.value)}
                 placeholder="Zacatecas"
                 className={inputClass}
               />
@@ -279,9 +240,7 @@ export function Clientes() {
               type="submit"
               className="rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition hover:opacity-90"
             >
-              {clienteEditando
-                ? "Guardar cambios"
-                : "Agregar cliente"}
+              {clienteEditando ? "Guardar cambios" : "Agregar cliente"}
             </button>
 
             {clienteEditando && (
@@ -302,9 +261,7 @@ export function Clientes() {
       <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <div>
-            <h2 className="text-lg font-semibold">
-              Clientes registrados
-            </h2>
+            <h2 className="text-lg font-semibold">Clientes registrados</h2>
 
             <p className="text-sm text-muted-foreground">
               {clientes.length} clientes
@@ -325,25 +282,15 @@ export function Clientes() {
             <table className="w-full text-left text-sm">
               <thead className="bg-muted">
                 <tr>
-                  <th className="px-6 py-3 font-medium">
-                    Nombre
-                  </th>
+                  <th className="px-6 py-3 font-medium">Nombre</th>
 
-                  <th className="px-6 py-3 font-medium">
-                    Correo
-                  </th>
+                  <th className="px-6 py-3 font-medium">Correo</th>
 
-                  <th className="px-6 py-3 font-medium">
-                    Teléfono
-                  </th>
+                  <th className="px-6 py-3 font-medium">Teléfono</th>
 
-                  <th className="px-6 py-3 font-medium">
-                    Ciudad
-                  </th>
+                  <th className="px-6 py-3 font-medium">Ciudad</th>
 
-                  <th className="px-6 py-3 text-right font-medium">
-                    Acciones
-                  </th>
+                  <th className="px-6 py-3 text-right font-medium">Acciones</th>
                 </tr>
               </thead>
 
@@ -353,45 +300,34 @@ export function Clientes() {
                     key={cliente.id}
                     className="border-t border-border transition hover:bg-muted/50"
                   >
-                    <td className="px-6 py-4 font-medium">
-                      {cliente.nombre}
-                    </td>
+                    <td className="px-6 py-4 font-medium">{cliente.nombre}</td>
 
                     <td className="px-6 py-4 text-muted-foreground">
                       {cliente.correo}
                     </td>
 
-                    <td className="px-6 py-4">
-                      {cliente.telefono}
-                    </td>
+                    <td className="px-6 py-4">{cliente.telefono}</td>
 
-                    <td className="px-6 py-4">
-                      {cliente.ciudad}
-                    </td>
+                    <td className="px-6 py-4">{cliente.ciudad}</td>
 
                     <td className="px-6 py-4">
                       <div className="flex justify-end gap-2">
                         <button
                           type="button"
-                          onClick={() =>
-                            seleccionarCliente(cliente)
-                          }
+                          onClick={() => seleccionarCliente(cliente)}
                           className="rounded-lg border border-border px-3 py-2 text-xs font-medium transition hover:bg-muted"
                         >
                           Editar
                         </button>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            manejarEliminarCliente(
-                              cliente.id
-                            )
-                          }
-                          className="rounded-lg px-3 py-2 text-xs font-medium text-danger transition hover:bg-danger/10"
-                        >
-                          Eliminar
-                        </button>
+                        {esAdmin && (
+                          <button
+                            type="button"
+                            onClick={() => manejarEliminarCliente(cliente.id)}
+                            className="rounded-lg px-3 py-2 text-xs font-medium text-danger transition hover:bg-danger/10"
+                          >
+                            Eliminar
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

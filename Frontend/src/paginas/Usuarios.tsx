@@ -6,6 +6,7 @@ import {
   obtenerUsuarios,
   crearUsuario,
   actualizarUsuario,
+  cambiarPasswordUsuario,
 } from "../servicios/usuariosServicio";
 
 export function Usuarios() {
@@ -20,6 +21,12 @@ export function Usuarios() {
 
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
+
+  const [usuarioPassword, setUsuarioPassword] = useState<Usuario | null>(null);
+
+  const [nuevoPassword, setNuevoPassword] = useState("");
+
+  const [cambiandoPassword, setCambiandoPassword] = useState(false);
 
   useEffect(() => {
     const cargarUsuarios = async () => {
@@ -133,6 +140,40 @@ export function Usuarios() {
       if (error instanceof Error) {
         setError(error.message);
       }
+    }
+  };
+  const guardarNuevoPassword = async (
+    event: React.FormEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
+
+    if (!usuarioPassword) {
+      return;
+    }
+
+    if (nuevoPassword.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
+
+    try {
+      setCambiandoPassword(true);
+      setError("");
+
+      await cambiarPasswordUsuario(usuarioPassword.id, nuevoPassword);
+
+      setUsuarioPassword(null);
+      setNuevoPassword("");
+    } catch (error) {
+      console.error(error);
+
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("No se pudo cambiar la contraseña");
+      }
+    } finally {
+      setCambiandoPassword(false);
     }
   };
 
@@ -276,12 +317,77 @@ export function Usuarios() {
                       >
                         {usuario.activo ? "Desactivar" : "Activar"}
                       </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setUsuarioPassword(usuario);
+                          setNuevoPassword("");
+                          setError("");
+                        }}
+                        className="rounded-lg border border-border px-3 py-2 text-xs font-medium transition hover:bg-muted"
+                      >
+                        Cambiar contraseña
+                      </button>
                     </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        )}
+        {usuarioPassword && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div className="w-full max-w-md rounded-xl border border-border bg-surface p-6 shadow-xl">
+              <h2 className="text-xl font-semibold">Cambiar contraseña</h2>
+
+              <p className="mt-1 text-sm text-muted-foreground">
+                Usuario: {usuarioPassword.nombre}
+              </p>
+
+              <form onSubmit={guardarNuevoPassword} className="mt-6 space-y-4">
+                <div>
+                  <label
+                    htmlFor="nuevoPassword"
+                    className="mb-1.5 block text-sm font-medium"
+                  >
+                    Nueva contraseña
+                  </label>
+
+                  <input
+                    id="nuevoPassword"
+                    type="password"
+                    value={nuevoPassword}
+                    onChange={(event) => setNuevoPassword(event.target.value)}
+                    placeholder="Mínimo 6 caracteres"
+                    className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    autoFocus
+                  />
+                </div>
+
+                <div className="flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUsuarioPassword(null);
+                      setNuevoPassword("");
+                    }}
+                    className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted"
+                  >
+                    Cancelar
+                  </button>
+
+                  <button
+                    type="submit"
+                    disabled={cambiandoPassword}
+                    className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+                  >
+                    {cambiandoPassword ? "Guardando..." : "Cambiar contraseña"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         )}
       </section>
     </div>

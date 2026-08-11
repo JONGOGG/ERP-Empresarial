@@ -9,9 +9,9 @@ import {
 
 const router = Router();
 
-router.get("/", listarClientes);
+router.get("/", permitirRoles("ADMIN", "EMPLEADO"), listarClientes);
 router.post("/", permitirRoles("ADMIN", "EMPLEADO"), registrarCliente);
 router.put("/:id", permitirRoles("ADMIN", "EMPLEADO"), editarCliente);
-router.delete("/:id", permitirRoles("ADMIN"),  borrarCliente);
+router.delete("/:id", permitirRoles("ADMIN"), borrarCliente);
 
 export default router;

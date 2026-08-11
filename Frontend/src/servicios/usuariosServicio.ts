@@ -57,3 +57,20 @@ export async function actualizarUsuario(
 
   return respuesta.json();
 }
+
+export async function cambiarPasswordUsuario(id: number, password: string) {
+  const respuesta = await apiFetch(`/usuarios/${id}/password`, {
+    method: "PUT",
+    body: JSON.stringify({
+      password,
+    }),
+  });
+
+  if (!respuesta.ok) {
+    const error = await respuesta.json();
+
+    throw new Error(error.mensaje || "No se pudo cambiar la contraseña");
+  }
+
+  return respuesta.json();
+}

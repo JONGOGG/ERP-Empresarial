@@ -75,3 +75,23 @@ export function actualizarUsuario(id: number, datos: DatosActualizarUsuario) {
     },
   });
 }
+
+export async function cambiarPasswordUsuario(id: number, password: string) {
+  const passwordCifrado = await bcrypt.hash(password, 10);
+
+  return prisma.usuario.update({
+    where: {
+      id,
+    },
+    data: {
+      password: passwordCifrado,
+    },
+    select: {
+      id: true,
+      nombre: true,
+      correo: true,
+      rol: true,
+      activo: true,
+    },
+  });
+}

@@ -12,6 +12,12 @@ import {
 import { obtenerCategorias } from "../servicios/categoriasServicio";
 
 export function Productos() {
+  const usuarioGuardado = localStorage.getItem("usuario");
+
+  const usuario = usuarioGuardado ? JSON.parse(usuarioGuardado) : null;
+
+  const esAdmin = usuario?.rol === "ADMIN";
+
   const [productos, setProductos] = useState<Producto[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
 
@@ -173,7 +179,7 @@ export function Productos() {
 
       {/* Aviso */}
 
-      {categorias.length === 0 && (
+      {esAdmin && categorias.length === 0 && (
         <div className="rounded-lg border border-accent/30 bg-accent/10 p-4">
           <p className="text-sm font-medium">
             Primero debes crear al menos una categoría.
@@ -190,130 +196,130 @@ export function Productos() {
       )}
 
       {/* Formulario */}
+      {esAdmin && (
+        <section className="rounded-xl border border-border bg-surface shadow-sm">
+          <div className="border-b border-border px-6 py-4">
+            <h2 className="text-lg font-semibold">
+              {productoEditando ? "Editar producto" : "Nuevo producto"}
+            </h2>
 
-      <section className="rounded-xl border border-border bg-surface shadow-sm">
-        <div className="border-b border-border px-6 py-4">
-          <h2 className="text-lg font-semibold">
-            {productoEditando ? "Editar producto" : "Nuevo producto"}
-          </h2>
-
-          <p className="mt-1 text-sm text-muted-foreground">
-            {productoEditando
-              ? "Modifica la información del producto seleccionado."
-              : "Registra un nuevo producto en el inventario."}
-          </p>
-        </div>
-
-        <form onSubmit={guardarProducto} className="p-6">
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-5">
-            <div>
-              <label htmlFor="nombre" className={labelClass}>
-                Nombre
-              </label>
-
-              <input
-                id="nombre"
-                type="text"
-                value={nombre}
-                onChange={(event) => setNombre(event.target.value)}
-                placeholder="Ej. Laptop Lenovo"
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="sku" className={labelClass}>
-                SKU
-              </label>
-
-              <input
-                id="sku"
-                type="text"
-                value={sku}
-                onChange={(event) => setSku(event.target.value)}
-                placeholder="PROD-001"
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="precio" className={labelClass}>
-                Precio
-              </label>
-
-              <input
-                id="precio"
-                type="number"
-                min="0"
-                step="0.01"
-                value={precio}
-                onChange={(event) => setPrecio(event.target.value)}
-                placeholder="0.00"
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="stock" className={labelClass}>
-                Stock
-              </label>
-
-              <input
-                id="stock"
-                type="number"
-                min="0"
-                step="1"
-                value={stock}
-                onChange={(event) => setStock(event.target.value)}
-                placeholder="0"
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="categoria" className={labelClass}>
-                Categoría
-              </label>
-
-              <select
-                id="categoria"
-                value={categoriaId}
-                onChange={(event) => setCategoriaId(event.target.value)}
-                className={inputClass}
-              >
-                <option value="">Selecciona una categoría</option>
-
-                {categorias.map((categoria) => (
-                  <option key={categoria.id} value={categoria.id}>
-                    {categoria.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {productoEditando
+                ? "Modifica la información del producto seleccionado."
+                : "Registra un nuevo producto en el inventario."}
+            </p>
           </div>
 
-          <div className="mt-6 flex items-center gap-3">
-            <button
-              type="submit"
-              disabled={categorias.length === 0}
-              className="rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {productoEditando ? "Guardar cambios" : "Agregar producto"}
-            </button>
+          <form onSubmit={guardarProducto} className="p-6">
+            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-5">
+              <div>
+                <label htmlFor="nombre" className={labelClass}>
+                  Nombre
+                </label>
 
-            {productoEditando && (
+                <input
+                  id="nombre"
+                  type="text"
+                  value={nombre}
+                  onChange={(event) => setNombre(event.target.value)}
+                  placeholder="Ej. Laptop Lenovo"
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="sku" className={labelClass}>
+                  SKU
+                </label>
+
+                <input
+                  id="sku"
+                  type="text"
+                  value={sku}
+                  onChange={(event) => setSku(event.target.value)}
+                  placeholder="PROD-001"
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="precio" className={labelClass}>
+                  Precio
+                </label>
+
+                <input
+                  id="precio"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={precio}
+                  onChange={(event) => setPrecio(event.target.value)}
+                  placeholder="0.00"
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="stock" className={labelClass}>
+                  Stock
+                </label>
+
+                <input
+                  id="stock"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={stock}
+                  onChange={(event) => setStock(event.target.value)}
+                  placeholder="0"
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="categoria" className={labelClass}>
+                  Categoría
+                </label>
+
+                <select
+                  id="categoria"
+                  value={categoriaId}
+                  onChange={(event) => setCategoriaId(event.target.value)}
+                  className={inputClass}
+                >
+                  <option value="">Selecciona una categoría</option>
+
+                  {categorias.map((categoria) => (
+                    <option key={categoria.id} value={categoria.id}>
+                      {categoria.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center gap-3">
               <button
-                type="button"
-                onClick={limpiarFormulario}
-                className="rounded-lg border border-border bg-surface px-5 py-2.5 text-sm font-medium transition hover:bg-muted"
+                type="submit"
+                disabled={categorias.length === 0}
+                className="rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Cancelar
+                {productoEditando ? "Guardar cambios" : "Agregar producto"}
               </button>
-            )}
-          </div>
-        </form>
-      </section>
 
+              {productoEditando && (
+                <button
+                  type="button"
+                  onClick={limpiarFormulario}
+                  className="rounded-lg border border-border bg-surface px-5 py-2.5 text-sm font-medium transition hover:bg-muted"
+                >
+                  Cancelar
+                </button>
+              )}
+            </div>
+          </form>
+        </section>
+      )}
       {/* Tabla */}
 
       <section className="overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
@@ -349,8 +355,11 @@ export function Productos() {
                   <th className="px-6 py-3 font-medium">Stock</th>
 
                   <th className="px-6 py-3 font-medium">Categoría</th>
-
-                  <th className="px-6 py-3 text-right font-medium">Acciones</th>
+                  {esAdmin && (
+                    <th className="px-6 py-3 text-right font-medium">
+                      Acciones
+                    </th>
+                  )}
                 </tr>
               </thead>
 
@@ -396,25 +405,27 @@ export function Productos() {
                       {producto.categoria?.nombre ?? "Sin categoría"}
                     </td>
 
-                    <td className="px-6 py-4">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => seleccionarProducto(producto)}
-                          className="rounded-lg border border-border px-3 py-2 text-xs font-medium transition hover:bg-muted"
-                        >
-                          Editar
-                        </button>
+                    {esAdmin && (
+                      <td className="px-6 py-4">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => seleccionarProducto(producto)}
+                            className="rounded-lg border border-border px-3 py-2 text-xs font-medium transition hover:bg-muted"
+                          >
+                            Editar
+                          </button>
 
-                        <button
-                          type="button"
-                          onClick={() => manejarEliminarProducto(producto.id)}
-                          className="rounded-lg px-3 py-2 text-xs font-medium text-danger transition hover:bg-danger/10"
-                        >
-                          Eliminar
-                        </button>
-                      </div>
-                    </td>
+                          <button
+                            type="button"
+                            onClick={() => manejarEliminarProducto(producto.id)}
+                            className="rounded-lg px-3 py-2 text-xs font-medium text-danger transition hover:bg-danger/10"
+                          >
+                            Eliminar
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
