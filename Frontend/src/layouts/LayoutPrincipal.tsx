@@ -103,6 +103,10 @@ export function LayoutPrincipal() {
               <NavLink to="/usuarios" className={claseLink}>
                 Usuarios
               </NavLink>
+
+              <NavLink to="/reportes" className={claseLink}>
+                Reportes
+              </NavLink>
             </>
           )}
         </nav>

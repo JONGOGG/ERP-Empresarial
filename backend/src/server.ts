@@ -12,6 +12,7 @@ import proveedoresRoutes from "./routes/proveedores.routes.js";
 import comprasRoutes from "./routes/compras.routes.js";
 import inventarioRoutes from "./routes/inventario.routes.js";
 import usuariosRoutes from "./routes/usuarios.routes.js";
+import reportesRoutes from "./routes/reportes.routes.js";
 
 import { verificarToken } from "./middlewares/autenticacion.middleware.js";
 import { manejarErrores } from "./middlewares/error.middleware.js";
@@ -36,6 +37,7 @@ app.use("/api/compras", verificarToken, comprasRoutes);
 app.use("/api/dashboard", verificarToken, dashboardRoutes);
 app.use("/api/inventario", verificarToken, inventarioRoutes);
 app.use("/api/usuarios", verificarToken, usuariosRoutes);
+app.use("/api/reportes", verificarToken, reportesRoutes);
 
 app.use(manejarErrores);
 

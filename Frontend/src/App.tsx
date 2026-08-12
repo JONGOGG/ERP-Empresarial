@@ -15,6 +15,7 @@ import { DetalleCompra } from "./paginas/DetalleCompra";
 import { Inventario } from "./paginas/Inventario";
 import { AjustesInventario } from "./paginas/AjustesInventario";
 import { Usuarios } from "./paginas/Usuarios";
+import { Reportes } from "./paginas/Reportes";
 
 import { LayoutPrincipal } from "./layouts/LayoutPrincipal";
 
@@ -71,6 +72,8 @@ function App() {
               <Route path="/compras/historial" element={<HistorialCompras />} />
 
               <Route path="/compras/:id" element={<DetalleCompra />} />
+              
+              <Route path="/reportes" element={<Reportes />} />
 
               <Route
                 path="/inventario/ajustes"
