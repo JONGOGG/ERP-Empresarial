@@ -660,36 +660,6 @@ Authorization: Bearer <JWT>
 
 ---
 
-# 📸 Capturas
-
-> Agrega las imágenes reales del proyecto dentro de una carpeta `docs/images`.
-
-## Inicio de sesión
-
-![Inicio de sesión](docs/images/login.png)
-
-## Dashboard
-
-![Dashboard](docs/images/dashboard.png)
-
-## Productos
-
-![Productos](docs/images/productos.png)
-
-## Nueva venta
-
-![Nueva venta](docs/images/nueva-venta.png)
-
-## Inventario
-
-![Inventario](docs/images/inventario.png)
-
-## Reportes
-
-![Reportes](docs/images/reportes.png)
-
----
-
 # 📷 Cómo agregar las capturas
 
 Crea esta estructura:
